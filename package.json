@@ -15,10 +15,7 @@
     "svg"
   ],
   "main": "leader-line.min.js",
-  "files": [
-    "leader-line.min.js",
-    "bower.json"
-  ],
+  "types": "types/index.d.ts",
   "devDependencies": {
     "anim-event": "^1.0.16",
     "cheerio": "^1.0.0-rc.9",
@@ -40,12 +37,26 @@
   "homepage": "https://anseki.github.io/leader-line/",
   "repository": {
     "type": "git",
-    "url": "git://github.com/anseki/leader-line.git"
+    "url": "https://github.com/RichDom2185/leader-line"
   },
-  "bugs": "https://github.com/anseki/leader-line/issues",
+  "bugs": "https://github.com/RichDom2185/leader-line/issues",
   "license": "MIT",
   "author": {
     "name": "anseki",
     "url": "https://github.com/anseki"
-  }
+  },
+  "contributors": [
+    {
+      "name": "anseki",
+      "url": "https://github.com/anseki"
+    },
+    {
+      "name": "II-alex-II",
+      "url": "https://github.com/II-alex-II"
+    },
+    {
+      "name": "Richard Dominick",
+      "url": "https://github.com/RichDom2185"
+    }
+  ]
 }
