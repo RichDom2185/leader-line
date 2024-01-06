@@ -10,7 +10,7 @@
 /* eslint no-underscore-dangle: [2, {"allow": ["_id"]}] */
 /* global traceLog:false */
 
-;var LeaderLine = (function() { // eslint-disable-line no-extra-semi
+var LeaderLine = (function () { // eslint-disable-line no-extra-semi
   'use strict';
 
   /**
@@ -42,11 +42,12 @@
   var
     APP_ID = 'leader-line',
     SOCKET_TOP = 1, SOCKET_RIGHT = 2, SOCKET_BOTTOM = 3, SOCKET_LEFT = 4,
-    SOCKET_KEY_2_ID = {top: SOCKET_TOP, right: SOCKET_RIGHT, bottom: SOCKET_BOTTOM, left: SOCKET_LEFT},
+    SOCKET_KEY_2_ID = { top: SOCKET_TOP, right: SOCKET_RIGHT, bottom: SOCKET_BOTTOM, left: SOCKET_LEFT },
 
     PATH_STRAIGHT = 1, PATH_ARC = 2, PATH_FLUID = 3, PATH_MAGNET = 4, PATH_GRID = 5,
     PATH_KEY_2_ID = {
-      straight: PATH_STRAIGHT, arc: PATH_ARC, fluid: PATH_FLUID, magnet: PATH_MAGNET, grid: PATH_GRID},
+      straight: PATH_STRAIGHT, arc: PATH_ARC, fluid: PATH_FLUID, magnet: PATH_MAGNET, grid: PATH_GRID
+    },
 
     /**
      * @typedef {Object} SymbolConf
@@ -84,7 +85,7 @@
 
     SOCKET_IDS = [SOCKET_TOP, SOCKET_RIGHT, SOCKET_BOTTOM, SOCKET_LEFT],
     KEYWORD_AUTO = 'auto',
-    BBOX_PROP = {x: 'left', y: 'top', width: 'width', height: 'height'},
+    BBOX_PROP = { x: 'left', y: 'top', width: 'width', height: 'height' },
 
     MIN_GRAVITY = 80, MIN_GRAVITY_SIZE = 4, MIN_GRAVITY_R = 5,
     MIN_OH_GRAVITY = 120, MIN_OH_GRAVITY_OH = 8, MIN_OH_GRAVITY_R = 3.75,
@@ -119,10 +120,10 @@
       plugOutlineSizeSE: [1, 1]
     },
 
-    isObject = (function() {
+    isObject = (function () {
       var toString = {}.toString, fnToString = {}.hasOwnProperty.toString,
         objFnString = fnToString.call(Object);
-      return function(obj) {
+      return function (obj) {
         var proto, constructor;
         return obj && toString.call(obj) === '[object Object]' &&
           (!(proto = Object.getPrototypeOf(obj)) ||
@@ -130,7 +131,7 @@
             typeof constructor === 'function' && fnToString.call(constructor) === objFnString);
       };
     })(),
-    isFinite = Number.isFinite || function(value) { return typeof value === 'number' && window.isFinite(value); },
+    isFinite = Number.isFinite || function (value) { return typeof value === 'number' && window.isFinite(value); },
 
     /* [DEBUG/]
     anim = @INCLUDE[code:anim]@,
@@ -148,35 +149,35 @@
     /** @typedef {{hasSE, hasProps, iniValue}} StatConf */
     /** @type {{statId: string, StatConf}} */
     STATS = {
-      line_altColor: {iniValue: false}, line_color: {}, line_colorTra: {iniValue: false}, line_strokeWidth: {},
-      plug_enabled: {iniValue: false}, plug_enabledSE: {hasSE: true, iniValue: false},
-      plug_plugSE: {hasSE: true, iniValue: PLUG_BEHIND},
-      plug_colorSE: {hasSE: true}, plug_colorTraSE: {hasSE: true, iniValue: false},
-      plug_markerWidthSE: {hasSE: true}, plug_markerHeightSE: {hasSE: true},
-      lineOutline_enabled: {iniValue: false},
-      lineOutline_color: {}, lineOutline_colorTra: {iniValue: false},
+      line_altColor: { iniValue: false }, line_color: {}, line_colorTra: { iniValue: false }, line_strokeWidth: {},
+      plug_enabled: { iniValue: false }, plug_enabledSE: { hasSE: true, iniValue: false },
+      plug_plugSE: { hasSE: true, iniValue: PLUG_BEHIND },
+      plug_colorSE: { hasSE: true }, plug_colorTraSE: { hasSE: true, iniValue: false },
+      plug_markerWidthSE: { hasSE: true }, plug_markerHeightSE: { hasSE: true },
+      lineOutline_enabled: { iniValue: false },
+      lineOutline_color: {}, lineOutline_colorTra: { iniValue: false },
       lineOutline_strokeWidth: {}, lineOutline_inStrokeWidth: {},
-      plugOutline_enabledSE: {hasSE: true, iniValue: false},
-      plugOutline_plugSE: {hasSE: true, iniValue: PLUG_BEHIND},
-      plugOutline_colorSE: {hasSE: true}, plugOutline_colorTraSE: {hasSE: true, iniValue: false},
-      plugOutline_strokeWidthSE: {hasSE: true}, plugOutline_inStrokeWidthSE: {hasSE: true},
-      position_socketXYSE: {hasSE: true, hasProps: true}, position_plugOverheadSE: {hasSE: true},
-      position_path: {}, position_lineStrokeWidth: {}, position_socketGravitySE: {hasSE: true},
-      path_pathData: {}, path_edge: {hasProps: true},
-      viewBox_bBox: {hasProps: true}, viewBox_plugBCircleSE: {hasSE: true},
-      lineMask_enabled: {iniValue: false},
-      lineMask_outlineMode: {iniValue: false},
+      plugOutline_enabledSE: { hasSE: true, iniValue: false },
+      plugOutline_plugSE: { hasSE: true, iniValue: PLUG_BEHIND },
+      plugOutline_colorSE: { hasSE: true }, plugOutline_colorTraSE: { hasSE: true, iniValue: false },
+      plugOutline_strokeWidthSE: { hasSE: true }, plugOutline_inStrokeWidthSE: { hasSE: true },
+      position_socketXYSE: { hasSE: true, hasProps: true }, position_plugOverheadSE: { hasSE: true },
+      position_path: {}, position_lineStrokeWidth: {}, position_socketGravitySE: { hasSE: true },
+      path_pathData: {}, path_edge: { hasProps: true },
+      viewBox_bBox: { hasProps: true }, viewBox_plugBCircleSE: { hasSE: true },
+      lineMask_enabled: { iniValue: false },
+      lineMask_outlineMode: { iniValue: false },
       lineMask_x: {}, lineMask_y: {},
       lineOutlineMask_x: {}, lineOutlineMask_y: {},
       maskBGRect_x: {}, maskBGRect_y: {},
-      capsMaskAnchor_enabledSE: {hasSE: true, iniValue: false},
-      capsMaskAnchor_pathDataSE: {hasSE: true},
-      capsMaskAnchor_strokeWidthSE: {hasSE: true},
-      capsMaskMarker_enabled: {iniValue: false}, capsMaskMarker_enabledSE: {hasSE: true, iniValue: false},
-      capsMaskMarker_plugSE: {hasSE: true, iniValue: PLUG_BEHIND},
-      capsMaskMarker_markerWidthSE: {hasSE: true}, capsMaskMarker_markerHeightSE: {hasSE: true},
-      caps_enabled: {iniValue: false},
-      attach_plugSideLenSE: {hasSE: true}, attach_plugBackLenSE: {hasSE: true}
+      capsMaskAnchor_enabledSE: { hasSE: true, iniValue: false },
+      capsMaskAnchor_pathDataSE: { hasSE: true },
+      capsMaskAnchor_strokeWidthSE: { hasSE: true },
+      capsMaskMarker_enabled: { iniValue: false }, capsMaskMarker_enabledSE: { hasSE: true, iniValue: false },
+      capsMaskMarker_plugSE: { hasSE: true, iniValue: PLUG_BEHIND },
+      capsMaskMarker_markerWidthSE: { hasSE: true }, capsMaskMarker_markerHeightSE: { hasSE: true },
+      caps_enabled: { iniValue: false },
+      attach_plugSideLenSE: { hasSE: true }, attach_plugBackLenSE: { hasSE: true }
     },
     SHOW_STATS = {
       show_on: {}, show_effect: {}, show_animOptions: {}, show_animId: {}, show_inAnim: {}
@@ -202,7 +203,7 @@
   window.IS_GECKO = IS_GECKO;
   window.IS_EDGE = IS_EDGE;
   window.IS_WEBKIT = IS_WEBKIT;
-  window.engineFlags = function(flags) {
+  window.engineFlags = function (flags) {
     if (typeof flags.IS_TRIDENT === 'boolean') { window.IS_TRIDENT = IS_TRIDENT = flags.IS_TRIDENT; }
     if (typeof flags.IS_BLINK === 'boolean') { window.IS_BLINK = IS_BLINK = flags.IS_BLINK; }
     if (typeof flags.IS_GECKO === 'boolean') { window.IS_GECKO = IS_GECKO = flags.IS_GECKO; }
@@ -215,25 +216,25 @@
     var typeA, keysA;
     return typeof a !== typeof b ||
       (typeA = isObject(a) ? 'obj' : Array.isArray(a) ? 'array' : '') !==
-        (isObject(b) ? 'obj' : Array.isArray(b) ? 'array' : '') ||
+      (isObject(b) ? 'obj' : Array.isArray(b) ? 'array' : '') ||
       (
         typeA === 'obj' ?
           hasChanged((keysA = Object.keys(a).sort()), Object.keys(b).sort()) ||
-            keysA.some(function(prop) { return hasChanged(a[prop], b[prop]); }) :
-        typeA === 'array' ?
-          a.length !== b.length || a.some(function(aVal, i) { return hasChanged(aVal, b[i]); }) :
-        a !== b
+          keysA.some(function (prop) { return hasChanged(a[prop], b[prop]); }) :
+          typeA === 'array' ?
+            a.length !== b.length || a.some(function (aVal, i) { return hasChanged(aVal, b[i]); }) :
+            a !== b
       );
   }
   window.hasChanged = hasChanged; // [DEBUG/]
 
   function copyTree(obj) {
     return !obj ? obj :
-      isObject(obj) ? Object.keys(obj).reduce(function(copyObj, key) {
+      isObject(obj) ? Object.keys(obj).reduce(function (copyObj, key) {
         copyObj[key] = copyTree(obj[key]);
         return copyObj;
       }, {}) :
-      Array.isArray(obj) ? obj.map(copyTree) : obj;
+        Array.isArray(obj) ? obj.map(copyTree) : obj;
   }
   window.copyTree = copyTree; // [DEBUG/]
 
@@ -305,34 +306,34 @@
     if ('onmouseenter' in element && 'onmouseleave' in element) { // Supported
       element.addEventListener('mouseenter', enter, false);
       element.addEventListener('mouseleave', leave, false);
-      return function() {
+      return function () {
         element.removeEventListener('mouseenter', enter, false);
         element.removeEventListener('mouseleave', leave, false);
       };
 
     } else { // Unsupported
       console.warn('mouseenter and mouseleave events polyfill is enabled.');
-      over = function(event) {
+      over = function (event) {
         /* eslint-disable no-invalid-this */
         if (!event.relatedTarget ||
-            event.relatedTarget !== this &&
-            !(this.compareDocumentPosition(event.relatedTarget) & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
+          event.relatedTarget !== this &&
+          !(this.compareDocumentPosition(event.relatedTarget) & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
           enter.apply(this, arguments);
         }
         /* eslint-enable no-invalid-this */
       };
       element.addEventListener('mouseover', over);
-      out = function(event) {
+      out = function (event) {
         /* eslint-disable no-invalid-this */
         if (!event.relatedTarget ||
-            event.relatedTarget !== this &&
-            !(this.compareDocumentPosition(event.relatedTarget) & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
+          event.relatedTarget !== this &&
+          !(this.compareDocumentPosition(event.relatedTarget) & Node.DOCUMENT_POSITION_CONTAINED_BY)) {
           leave.apply(this, arguments);
         }
         /* eslint-enable no-invalid-this */
       };
       element.addEventListener('mouseout', out);
-      return function() {
+      return function () {
         element.removeEventListener('mouseover', over, false);
         element.removeEventListener('mouseout', out, false);
       };
@@ -439,7 +440,7 @@
     if (!frames.length) { // no frame
       return getBBox(element);
     }
-    frames.forEach(function(frame, i) {
+    frames.forEach(function (frame, i) {
       var coordinates = getBBox(frame, i > 0); // relative to document when 1st one.
       left += coordinates.left;
       top += coordinates.top;
@@ -470,8 +471,8 @@
     if (frames1.length && frames2.length) {
       frames1.reverse();
       frames2.reverse();
-      frames1.some(function(frame1) {
-        return frames2.some(function(frame2) {
+      frames1.some(function (frame1) {
+        return frames2.some(function (frame2) {
           if (frame2 === frame1) {
             commonWindow = frame2.contentWindow;
             return true;
@@ -507,13 +508,13 @@
       t = (sx2 * (line1P0.y - line2P0.y) - sy2 * (line1P0.x - line2P0.x)) / (-sx2 * sy1 + sx1 * sy2);
 
     return s >= 0 && s <= 1 && t >= 0 && t <= 1 ?
-      {x: line1P0.x + (t * sx1), y: line1P0.y + (t * sy1)} : null;
+      { x: line1P0.x + (t * sx1), y: line1P0.y + (t * sy1) } : null;
   }
   window.getIntersection = getIntersection; // [DEBUG/]
 
   function extendLine(p0, p1, len) {
     var angle = Math.atan2(p0.y - p1.y, p1.x - p0.x);
-    return {x: p1.x + Math.cos(angle) * len, y: p1.y + Math.sin(angle) * len * -1};
+    return { x: p1.x + Math.cos(angle) * len, y: p1.y + Math.sin(angle) * len * -1 };
   }
   window.extendLine = extendLine; // [DEBUG/]
 
@@ -540,12 +541,13 @@
     // from:  new path of side to p0
     // to:    new path of side to p3
     /* eslint-disable key-spacing */
-    return {x: x, y: y,
-      fromP2: {x: mx, y: my},
-      toP1:   {x: nx, y: ny},
-      fromP1: {x: ax, y: ay},
-      toP2:   {x: cx, y: cy},
-      angle:  angle
+    return {
+      x: x, y: y,
+      fromP2: { x: mx, y: my },
+      toP1: { x: nx, y: ny },
+      fromP1: { x: ax, y: ay },
+      toP2: { x: cx, y: cy },
+      angle: angle
     };
     /* eslint-enable key-spacing */
   }
@@ -559,14 +561,14 @@
 
     var
       TVALUES = [-0.1252, 0.1252, -0.3678, 0.3678, -0.5873, 0.5873,
-        -0.7699, 0.7699, -0.9041, 0.9041, -0.9816, 0.9816],
+      -0.7699, 0.7699, -0.9041, 0.9041, -0.9816, 0.9816],
       CVALUES = [0.2491, 0.2491, 0.2335, 0.2335, 0.2032, 0.2032,
         0.1601, 0.1601, 0.1069, 0.1069, 0.0472, 0.0472],
       sum = 0, z2, ct, xbase, ybase, comb;
 
     t = t == null || t > 1 ? 1 : t < 0 ? 0 : t;
     z2 = t / 2;
-    TVALUES.forEach(function(tValue, i) {
+    TVALUES.forEach(function (tValue, i) {
       ct = z2 * tValue + z2;
       xbase = base3(ct, p0.x, p1.x, p2.x, p3.x);
       ybase = base3(ct, p0.y, p1.y, p2.y, p3.y);
@@ -593,8 +595,8 @@
   function getOffsetLine(p0, p1, offsetLen) {
     var angle = Math.atan2(p0.y - p1.y, p1.x - p0.x) + Math.PI * 0.5;
     return [
-      {x: p0.x + Math.cos(angle) * offsetLen, y: p0.y + Math.sin(angle) * offsetLen * -1},
-      {x: p1.x + Math.cos(angle) * offsetLen, y: p1.y + Math.sin(angle) * offsetLen * -1}
+      { x: p0.x + Math.cos(angle) * offsetLen, y: p0.y + Math.sin(angle) * offsetLen * -1 },
+      { x: p1.x + Math.cos(angle) * offsetLen, y: p1.y + Math.sin(angle) * offsetLen * -1 }
     ];
   }
   window.getOffsetLine = getOffsetLine; // [DEBUG/]
@@ -621,18 +623,18 @@
 
   function pathList2PathData(pathList, cbPoint) {
     var pathData;
-    pathList.forEach(function(pointsOrg) {
-      var points = cbPoint ? pointsOrg.map(function(pointOrg) {
-        var point = {x: pointOrg.x, y: pointOrg.y};
+    pathList.forEach(function (pointsOrg) {
+      var points = cbPoint ? pointsOrg.map(function (pointOrg) {
+        var point = { x: pointOrg.x, y: pointOrg.y };
         cbPoint(point);
         return point;
       }) : pointsOrg;
       // error is thrown if `points` has no data
-      if (!pathData) { pathData = [{type: 'M', values: [points[0].x, points[0].y]}]; }
+      if (!pathData) { pathData = [{ type: 'M', values: [points[0].x, points[0].y] }]; }
       pathData.push(
-        !points.length ? {type: 'Z', values: []} :
-        points.length === 2 ? {type: 'L', values: [points[1].x, points[1].y]} :
-          {type: 'C', values: [points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y]});
+        !points.length ? { type: 'Z', values: [] } :
+          points.length === 2 ? { type: 'L', values: [points[1].x, points[1].y] } :
+            { type: 'C', values: [points[1].x, points[1].y, points[2].x, points[2].y, points[3].x, points[3].y] });
     });
     return pathData;
   }
@@ -640,34 +642,34 @@
 
   function getAllPathListLen(pathList) {
     var pathSegsLen = [], pathLenAll = 0;
-    pathList.forEach(function(points) {
+    pathList.forEach(function (points) {
       var pathLen = (points.length === 2 ? getPointsLength : getCubicLength).apply(null, points);
       pathSegsLen.push(pathLen);
       pathLenAll += pathLen;
     });
-    return {segsLen: pathSegsLen, lenAll: pathLenAll};
+    return { segsLen: pathSegsLen, lenAll: pathLenAll };
   }
 
   function getAllPathDataLen(pathData) {
     var curPoint;
-    return pathData.reduce(function(pathLenAll, pathSeg) {
+    return pathData.reduce(function (pathLenAll, pathSeg) {
       var values = pathSeg.values, endPoint;
       switch (pathSeg.type) {
         case 'M':
-          curPoint = {x: values[0], y: values[1]};
+          curPoint = { x: values[0], y: values[1] };
           break;
         case 'L':
-          endPoint = {x: values[0], y: values[1]};
+          endPoint = { x: values[0], y: values[1] };
           if (curPoint) {
             pathLenAll += getPointsLength(curPoint, endPoint);
           }
           curPoint = endPoint;
           break;
         case 'C':
-          endPoint = {x: values[4], y: values[5]};
+          endPoint = { x: values[4], y: values[5] };
           if (curPoint) {
             pathLenAll += getCubicLength(curPoint,
-              {x: values[0], y: values[1]}, {x: values[2], y: values[3]}, endPoint);
+              { x: values[0], y: values[1] }, { x: values[2], y: values[3] }, endPoint);
           }
           curPoint = endPoint;
           break;
@@ -680,10 +682,10 @@
 
   function pathDataHasChanged(a, b) {
     return a == null || b == null ||
-      a.length !== b.length || a.some(function(aSeg, i) {
+      a.length !== b.length || a.some(function (aSeg, i) {
         var bSeg = b[i];
         return aSeg.type !== bSeg.type ||
-          aSeg.values.some(function(aSegValue, i) { return aSegValue !== bSeg.values[i]; });
+          aSeg.values.some(function (aSegValue, i) { return aSegValue !== bSeg.values[i]; });
       });
   }
   window.pathDataHasChanged = pathDataHasChanged; // [DEBUG/]
@@ -692,11 +694,11 @@
     var right = bBox.right != null ? bBox.right : bBox.left + bBox.width,
       bottom = bBox.bottom != null ? bBox.bottom : bBox.top + bBox.height;
     return [
-      {type: 'M', values: [bBox.left, bBox.top]},
-      {type: 'L', values: [right, bBox.top]},
-      {type: 'L', values: [right, bottom]},
-      {type: 'L', values: [bBox.left, bottom]},
-      {type: 'Z', values: []}
+      { type: 'M', values: [bBox.left, bBox.top] },
+      { type: 'L', values: [right, bBox.top] },
+      { type: 'L', values: [right, bottom] },
+      { type: 'L', values: [bBox.left, bottom] },
+      { type: 'Z', values: [] }
     ];
   }
 
@@ -718,7 +720,7 @@
   function addDelayedProc(proc) {
     function execDelayedProcs() {
       traceLog.add('<execDelayedProcs>'); // [DEBUG/]
-      delayedProcs.forEach(function(proc) { proc(); });
+      delayedProcs.forEach(function (proc) { proc(); });
       delayedProcs = [];
       traceLog.add('</execDelayedProcs>'); // [DEBUG/]
     }
@@ -729,7 +731,7 @@
 
   function forceReflow(target) {
     // for TRIDENT and BLINK bug (reflow like `offsetWidth` can't update)
-    setTimeout(function() {
+    setTimeout(function () {
       var parent = target.parentNode, next = target.nextSibling;
       // It has to be removed first for BLINK.
       parent.insertBefore(parent.removeChild(target), next);
@@ -742,7 +744,7 @@
   }
 
   function forceReflowApply(props) {
-    props.reflowTargets.forEach(function(target) { forceReflow(target); });
+    props.reflowTargets.forEach(function (target) { forceReflow(target); });
     props.reflowTargets = [];
   }
 
@@ -847,13 +849,13 @@
   window.newDropShadow = newDropShadow; // [DEBUG/]
 
   function initStats(container, statsConf) {
-    Object.keys(statsConf).forEach(function(statName) {
+    Object.keys(statsConf).forEach(function (statName) {
       var statConf = statsConf[statName];
       container[statName] =
         statConf.iniValue != null ? (
           statConf.hasSE ? [statConf.iniValue, statConf.iniValue] : statConf.iniValue
         ) :
-        statConf.hasSE ? (statConf.hasProps ? [{}, {}] : []) : statConf.hasProps ? {} : null;
+          statConf.hasSE ? (statConf.hasProps ? [{}, {}] : []) : statConf.hasProps ? {} : null;
     });
   }
 
@@ -862,7 +864,7 @@
       traceLog.add(log || key + '=%s', value); // [DEBUG/]
       container[key] = value;
       if (eventHandlers) {
-        eventHandlers.forEach(function(handler) { handler(props, value, key); });
+        eventHandlers.forEach(function (handler) { handler(props, value, key); });
       }
       return true;
     }
@@ -880,17 +882,17 @@
     var baseDocument = window.document,
       stylesHtml = window.getComputedStyle(baseDocument.documentElement, ''),
       stylesBody = window.getComputedStyle(baseDocument.body, ''),
-      bodyOffset = {x: 0, y: 0};
+      bodyOffset = { x: 0, y: 0 };
 
     if (stylesBody.position !== 'static') {
       // When `<body>` has `position:(non-static)`,
       // `element{position:absolute}` is positioned relative to border-box of `<body>`.
       bodyOffset.x -=
         [stylesHtml.marginLeft, stylesHtml.borderLeftWidth, stylesHtml.paddingLeft,
-          stylesBody.marginLeft, stylesBody.borderLeftWidth].reduce(sumProps, 0);
+        stylesBody.marginLeft, stylesBody.borderLeftWidth].reduce(sumProps, 0);
       bodyOffset.y -=
         [stylesHtml.marginTop, stylesHtml.borderTopWidth, stylesHtml.paddingTop,
-          stylesBody.marginTop, stylesBody.borderTopWidth].reduce(sumProps, 0);
+        stylesBody.marginTop, stylesBody.borderTopWidth].reduce(sumProps, 0);
     } else if (stylesHtml.position !== 'static') {
       // When `<body>` has `position:static` and `<html>` has `position:(non-static)`
       // `element{position:absolute}` is positioned relative to border-box of `<html>`.
@@ -927,7 +929,7 @@
       var element = defs.appendChild(baseDocument.createElementNS(SVG_NS, 'mask'));
       element.id = id;
       element.maskUnits.baseVal = SVGUnitTypes.SVG_UNIT_TYPE_USERSPACEONUSE;
-      [element.x, element.y, element.width, element.height].forEach(function(len) {
+      [element.x, element.y, element.width, element.height].forEach(function (len) {
         len.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX, 0);
       });
       return element;
@@ -944,7 +946,7 @@
     }
 
     function setWH100(element) {
-      [element.width, element.height].forEach(function(len) {
+      [element.width, element.height].forEach(function (len) {
         len.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PERCENTAGE, 100);
       });
       return element;
@@ -954,7 +956,7 @@
     // Init stats
     initStats(aplStats, STATS);
     // effect (before props.svg is changed)
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var keyEnabled = effectName + '_enabled';
       if (aplStats[keyEnabled]) {
         EFFECTS[effectName].remove(props);
@@ -990,15 +992,15 @@
     maskCaps = defs.appendChild(baseDocument.createElementNS(SVG_NS, 'g'));
     maskCaps.id = (capsId = prefix + '-caps');
 
-    props.capsMaskAnchorSE = [0, 1].map(function() {
+    props.capsMaskAnchorSE = [0, 1].map(function () {
       var element = maskCaps.appendChild(baseDocument.createElementNS(SVG_NS, 'path'));
       element.className.baseVal = APP_ID + '-caps-mask-anchor';
       return element;
     });
 
     props.lineMaskMarkerIdSE = [prefix + '-caps-mask-marker-0', prefix + '-caps-mask-marker-1'];
-    props.capsMaskMarkerSE = [0, 1].map(function(i) { return setupMarker(props.lineMaskMarkerIdSE[i]); });
-    props.capsMaskMarkerShapeSE = [0, 1].map(function(i) {
+    props.capsMaskMarkerSE = [0, 1].map(function (i) { return setupMarker(props.lineMaskMarkerIdSE[i]); });
+    props.capsMaskMarkerShapeSE = [0, 1].map(function (i) {
       var element = props.capsMaskMarkerSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'use'));
       element.className.baseVal = APP_ID + '-caps-mask-marker-shape';
       return element;
@@ -1057,8 +1059,8 @@
 
     // plugMaskSE
     props.plugMaskIdSE = [prefix + '-plug-mask-0', prefix + '-plug-mask-1'];
-    props.plugMaskSE = [0, 1].map(function(i) { return setupMask(props.plugMaskIdSE[i]); });
-    props.plugMaskShapeSE = [0, 1].map(function(i) {
+    props.plugMaskSE = [0, 1].map(function (i) { return setupMask(props.plugMaskIdSE[i]); });
+    props.plugMaskShapeSE = [0, 1].map(function (i) {
       var element = props.plugMaskSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'use'));
       element.className.baseVal = APP_ID + '-plug-mask-shape';
       return element;
@@ -1067,15 +1069,15 @@
     // plugOutlineMaskSE
     plugOutlineMaskIdSE = [];
     props.plugOutlineMaskSE = [0, 1].map(
-      function(i) { return setupMask((plugOutlineMaskIdSE[i] = prefix + '-plug-outline-mask-' + i)); });
-    props.plugOutlineMaskShapeSE = [0, 1].map(function(i) {
+      function (i) { return setupMask((plugOutlineMaskIdSE[i] = prefix + '-plug-outline-mask-' + i)); });
+    props.plugOutlineMaskShapeSE = [0, 1].map(function (i) {
       var element = props.plugOutlineMaskSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'use'));
       element.className.baseVal = APP_ID + '-plug-outline-mask-shape';
       return element;
     });
 
     props.plugMarkerIdSE = [prefix + '-plug-marker-0', prefix + '-plug-marker-1'];
-    props.plugMarkerSE = [0, 1].map(function(i) {
+    props.plugMarkerSE = [0, 1].map(function (i) {
       var element = setupMarker(props.plugMarkerIdSE[i]);
       if (IS_WEBKIT) {
         // [WEBKIT] mask in marker is resized with rasterise
@@ -1083,14 +1085,14 @@
       }
       return element;
     });
-    props.plugMarkerShapeSE = [0, 1].map(function(i) {
+    props.plugMarkerShapeSE = [0, 1].map(function (i) {
       return props.plugMarkerSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'g'));
     });
 
-    props.plugFaceSE = [0, 1].map(function(i) {
+    props.plugFaceSE = [0, 1].map(function (i) {
       return props.plugMarkerShapeSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'use'));
     });
-    props.plugOutlineFaceSE = [0, 1].map(function(i) {
+    props.plugOutlineFaceSE = [0, 1].map(function (i) {
       var element = props.plugMarkerShapeSE[i].appendChild(baseDocument.createElementNS(SVG_NS, 'use'));
       element.style.mask = 'url(#' + plugOutlineMaskIdSE[i] + ')';
       element.style.display = 'none';
@@ -1113,7 +1115,7 @@
     baseDocument.body.appendChild(svg);
 
     // label (after appendChild(svg), bBox is used)
-    [0, 1, 2].forEach(function(i) {
+    [0, 1, 2].forEach(function (i) {
       var label = props.options.labelSEM[i], attachProps;
       if (label && isAttachment(label, 'label')) {
         attachProps = insAttachProps[label._id];
@@ -1153,7 +1155,7 @@
     var options = props.options, curStats = props.curStats, events = props.events,
       updated = false;
 
-    [0, 1].forEach(function(i) {
+    [0, 1].forEach(function (i) {
       var plugId = options.plugSE[i], symbolConf,
         width, height, plugMarkerWidth, plugMarkerHeight, plugSideLen, plugBackLen, value;
 
@@ -1252,16 +1254,16 @@
     var options = props.options, curStats = props.curStats,
       updated = false;
 
-    [0, 1].forEach(function(i) {
+    [0, 1].forEach(function (i) {
       var plugId = curStats.plugOutline_plugSE[i],
         symbolConf = plugId !== PLUG_BEHIND ? SYMBOLS[PLUG_2_SYMBOL[plugId]] : null,
         value;
 
       updated = setStat(props, curStats.plugOutline_enabledSE, i,
         options.plugOutlineEnabledSE[i] &&
-          // `curStats.plug_enabled` might be independent of `curStats.plug_enabledSE` in future version.
-          curStats.plug_enabled && curStats.plug_enabledSE[i] &&
-          !!symbolConf && !!symbolConf.outlineBase /* Not depend on `curStats.plug_enabledSE` */
+        // `curStats.plug_enabled` might be independent of `curStats.plug_enabledSE` in future version.
+        curStats.plug_enabled && curStats.plug_enabledSE[i] &&
+        !!symbolConf && !!symbolConf.outlineBase /* Not depend on `curStats.plug_enabledSE` */
         /* [DEBUG] */, null, 'plugOutline_enabledSE[' + i + ']=%s'/* [/DEBUG] */) || updated;
       updated = setStat(props, curStats.plugOutline_colorSE, i,
         (value = options.plugOutlineColorSE[i] || curStats.lineOutline_color)
@@ -1279,7 +1281,7 @@
         updated = setStat(props, curStats.plugOutline_inStrokeWidthSE, i,
           curStats.plugOutline_colorTraSE[i] ?
             value - SHAPE_GAP / (curStats.line_strokeWidth / DEFAULT_OPTIONS.lineSize) /
-              options.plugSizeSE[i] * 2 :
+            options.plugSizeSE[i] * 2 :
             value / 2 /* half */
           /* [DEBUG] */, null, 'plugOutline_inStrokeWidthSE[' + i + ']%_'/* [/DEBUG] */) || updated;
       }
@@ -1300,14 +1302,14 @@
       value, updated = false;
 
     if (!curStats.line_altColor &&
-        setStat(props, aplStats, 'line_color', (value = curStats.line_color),
-          events.apl_line_color)) {
+      setStat(props, aplStats, 'line_color', (value = curStats.line_color),
+        events.apl_line_color)) {
       props.lineFace.style.stroke = value;
       updated = true;
     }
 
     if (setStat(props, aplStats, 'line_strokeWidth', (value = curStats.line_strokeWidth),
-        events.apl_line_strokeWidth)) {
+      events.apl_line_strokeWidth)) {
       props.lineShape.style.strokeWidth = value + 'px';
       updated = true;
       if (IS_GECKO || IS_TRIDENT) {
@@ -1324,7 +1326,7 @@
     }
 
     if (setStat(props, aplStats, 'lineOutline_enabled', (value = curStats.lineOutline_enabled),
-        events.apl_lineOutline_enabled)) {
+      events.apl_lineOutline_enabled)) {
       props.lineOutlineFace.style.display = value ? 'inline' : 'none';
       updated = true;
     }
@@ -1332,13 +1334,13 @@
     if (curStats.lineOutline_enabled) {
 
       if (setStat(props, aplStats, 'lineOutline_color', (value = curStats.lineOutline_color),
-          events.apl_lineOutline_color)) {
+        events.apl_lineOutline_color)) {
         props.lineOutlineFace.style.stroke = value;
         updated = true;
       }
 
       if (setStat(props, aplStats, 'lineOutline_strokeWidth', (value = curStats.lineOutline_strokeWidth),
-          events.apl_lineOutline_strokeWidth/* [DEBUG] */, 'lineOutline_strokeWidth%_'/* [/DEBUG] */)) {
+        events.apl_lineOutline_strokeWidth/* [DEBUG] */, 'lineOutline_strokeWidth%_'/* [/DEBUG] */)) {
         props.lineOutlineMaskShape.style.strokeWidth = value + 'px';
         updated = true;
         if (IS_TRIDENT) {
@@ -1350,7 +1352,7 @@
       }
 
       if (setStat(props, aplStats, 'lineOutline_inStrokeWidth', (value = curStats.lineOutline_inStrokeWidth),
-          events.apl_lineOutline_inStrokeWidth/* [DEBUG] */, 'lineOutline_inStrokeWidth%_'/* [/DEBUG] */)) {
+        events.apl_lineOutline_inStrokeWidth/* [DEBUG] */, 'lineOutline_inStrokeWidth%_'/* [/DEBUG] */)) {
         props.lineMaskShape.style.strokeWidth = value + 'px';
         updated = true;
         if (IS_TRIDENT) {
@@ -1363,20 +1365,20 @@
     }
 
     if (setStat(props, aplStats, 'plug_enabled', (value = curStats.plug_enabled),
-        events.apl_plug_enabled)) {
+      events.apl_plug_enabled)) {
       props.plugsFace.style.display = value ? 'inline' : 'none';
       updated = true;
     }
 
     if (curStats.plug_enabled) {
 
-      [0, 1].forEach(function(i) {
+      [0, 1].forEach(function (i) {
         var plugId = curStats.plug_plugSE[i],
           symbolConf = plugId !== PLUG_BEHIND ? SYMBOLS[PLUG_2_SYMBOL[plugId]] : null,
           marker = getMarkerProps(i, symbolConf);
 
         if (setStat(props, aplStats.plug_enabledSE, i, (value = curStats.plug_enabledSE[i]),
-            events.apl_plug_enabledSE/* [DEBUG] */, 'plug_enabledSE[' + i + ']=%s'/* [/DEBUG] */)) {
+          events.apl_plug_enabledSE/* [DEBUG] */, 'plug_enabledSE[' + i + ']=%s'/* [/DEBUG] */)) {
           props.plugsFace.style[marker.prop] = value ? 'url(#' + props.plugMarkerIdSE[i] + ')' : 'none';
           updated = true;
         }
@@ -1384,7 +1386,7 @@
         if (curStats.plug_enabledSE[i]) {
 
           if (setStat(props, aplStats.plug_plugSE, i, plugId,
-              events.apl_plug_plugSE/* [DEBUG] */, 'plug_plugSE[' + i + ']=%s'/* [/DEBUG] */)) {
+            events.apl_plug_plugSE/* [DEBUG] */, 'plug_plugSE[' + i + ']=%s'/* [/DEBUG] */)) {
             props.plugFaceSE[i].href.baseVal = '#' + symbolConf.elmId;
             setMarkerOrient(props, props.plugMarkerSE[i], marker.orient,
               symbolConf.bBox, props.svg, props.plugMarkerShapeSE[i], props.plugsFace);
@@ -1396,7 +1398,7 @@
           }
 
           if (setStat(props, aplStats.plug_colorSE, i, (value = curStats.plug_colorSE[i]),
-              events.apl_plug_colorSE/* [DEBUG] */, 'plug_colorSE[' + i + ']=%s'/* [/DEBUG] */)) {
+            events.apl_plug_colorSE/* [DEBUG] */, 'plug_colorSE[' + i + ']=%s'/* [/DEBUG] */)) {
             props.plugFaceSE[i].style.fill = value;
             updated = true;
             if ((IS_BLINK || IS_WEBKIT || IS_TRIDENT) && !curStats.line_colorTra) {
@@ -1406,17 +1408,17 @@
           }
 
           // plug_markerWidthSE, plug_markerHeightSE
-          ['markerWidth', 'markerHeight'].forEach(function(markerKey) {
+          ['markerWidth', 'markerHeight'].forEach(function (markerKey) {
             var statKey = 'plug_' + markerKey + 'SE';
             if (setStat(props, aplStats[statKey], i, (value = curStats[statKey][i]),
-                events['apl_' + statKey]/* [DEBUG] */, statKey + '[' + i + ']%_'/* [/DEBUG] */)) {
+              events['apl_' + statKey]/* [DEBUG] */, statKey + '[' + i + ']%_'/* [/DEBUG] */)) {
               props.plugMarkerSE[i][markerKey].baseVal.value = value;
               updated = true;
             }
           });
 
           if (setStat(props, aplStats.plugOutline_enabledSE, i, (value = curStats.plugOutline_enabledSE[i]),
-              events.apl_plugOutline_enabledSE
+            events.apl_plugOutline_enabledSE
               /* [DEBUG] */, 'plugOutline_enabledSE[' + i + ']=%s'/* [/DEBUG] */)) {
             if (value) {
               props.plugFaceSE[i].style.mask = 'url(#' + props.plugMaskIdSE[i] + ')';
@@ -1431,12 +1433,12 @@
           if (curStats.plugOutline_enabledSE[i]) {
 
             if (setStat(props, aplStats.plugOutline_plugSE, i, plugId,
-                events.apl_plugOutline_plugSE
+              events.apl_plugOutline_plugSE
                 /* [DEBUG] */, 'plugOutline_plugSE[' + i + ']=%s'/* [/DEBUG] */)) {
               props.plugOutlineFaceSE[i].href.baseVal =
                 props.plugMaskShapeSE[i].href.baseVal =
                 props.plugOutlineMaskShapeSE[i].href.baseVal = '#' + symbolConf.elmId;
-              [props.plugMaskSE[i], props.plugOutlineMaskSE[i]].forEach(function(mask) {
+              [props.plugMaskSE[i], props.plugOutlineMaskSE[i]].forEach(function (mask) {
                 mask.x.baseVal.value = symbolConf.bBox.left;
                 mask.y.baseVal.value = symbolConf.bBox.top;
                 mask.width.baseVal.value = symbolConf.bBox.width;
@@ -1446,7 +1448,7 @@
             }
 
             if (setStat(props, aplStats.plugOutline_colorSE, i, (value = curStats.plugOutline_colorSE[i]),
-                events.apl_plugOutline_colorSE
+              events.apl_plugOutline_colorSE
                 /* [DEBUG] */, 'plugOutline_colorSE[' + i + ']=%s'/* [/DEBUG] */)) {
               props.plugOutlineFaceSE[i].style.fill = value;
               updated = true;
@@ -1458,16 +1460,16 @@
             }
 
             if (setStat(props, aplStats.plugOutline_strokeWidthSE, i,
-                (value = curStats.plugOutline_strokeWidthSE[i]),
-                events.apl_plugOutline_strokeWidthSE
+              (value = curStats.plugOutline_strokeWidthSE[i]),
+              events.apl_plugOutline_strokeWidthSE
                 /* [DEBUG] */, 'plugOutline_strokeWidthSE[' + i + ']%_'/* [/DEBUG] */)) {
               props.plugOutlineMaskShapeSE[i].style.strokeWidth = value + 'px';
               updated = true;
             }
 
             if (setStat(props, aplStats.plugOutline_inStrokeWidthSE, i,
-                (value = curStats.plugOutline_inStrokeWidthSE[i]),
-                events.apl_plugOutline_inStrokeWidthSE
+              (value = curStats.plugOutline_inStrokeWidthSE[i]),
+              events.apl_plugOutline_inStrokeWidthSE
                 /* [DEBUG] */, 'plugOutline_inStrokeWidthSE[' + i + ']%_'/* [/DEBUG] */)) {
               props.plugMaskShapeSE[i].style.strokeWidth = value + 'px';
               updated = true;
@@ -1495,15 +1497,18 @@
 
     function getSocketXY(bBox, socketId) {
       var socketXY = (
-        socketId === SOCKET_TOP ? {x: bBox.left + bBox.width / 2, y: bBox.top} :
-        socketId === SOCKET_RIGHT ? {x: bBox.right, y: bBox.top + bBox.height / 2} :
-        socketId === SOCKET_BOTTOM ? {x: bBox.left + bBox.width / 2, y: bBox.bottom} :
-                    /* SOCKET_LEFT */ {x: bBox.left, y: bBox.top + bBox.height / 2});
+        socketId === SOCKET_TOP
+          ? { x: bBox.left + bBox.width / 2, y: bBox.top }
+          : socketId === SOCKET_RIGHT
+            ? { x: bBox.right, y: bBox.top + bBox.height / 2 }
+            : socketId === SOCKET_BOTTOM
+              ? { x: bBox.left + bBox.width / 2, y: bBox.bottom }
+              : /* SOCKET_LEFT */ { x: bBox.left, y: bBox.top + bBox.height / 2 });
       socketXY.socketId = socketId;
       return socketXY;
     }
 
-    function socketXY2Point(socketXY) { return {x: socketXY.x, y: socketXY.y}; }
+    function socketXY2Point(socketXY) { return { x: socketXY.x, y: socketXY.y }; }
 
     function socketXYHasChanged(a, b) {
       return a.x !== b.x || a.y !== b.y || a.socketId !== b.socketId;
@@ -1520,7 +1525,7 @@
     curStats.position_lineStrokeWidth = curStats.line_strokeWidth;
     curStats.position_socketGravitySE = curSocketGravitySE = copyTree(options.socketGravitySE);
 
-    anchorBBoxSE = [0, 1].map(function(i) {
+    anchorBBoxSE = [0, 1].map(function (i) {
       var anchor = options.anchorSE[i], isAttach = props.optionIsAttach.anchorSE[i],
         attachProps = isAttach !== false ? insAttachProps[anchor._id] : null,
 
@@ -1537,7 +1542,7 @@
     });
 
     // Decide each socket
-    (function() {
+    (function () {
       var socketXYsWk, socketsLenMin = -1, iFix, iAuto;
       if (options.socketSE[0] && options.socketSE[1]) {
         curSocketXYSE[0] = getSocketXY(anchorBBoxSE[0], options.socketSE[0]);
@@ -1545,10 +1550,10 @@
 
       } else {
         if (!options.socketSE[0] && !options.socketSE[1]) {
-          socketXYsWk = SOCKET_IDS.map(function(socketId) { return getSocketXY(anchorBBoxSE[1], socketId); });
-          SOCKET_IDS.map(function(socketId) { return getSocketXY(anchorBBoxSE[0], socketId); })
-            .forEach(function(socketXY0) {
-              socketXYsWk.forEach(function(socketXY1) {
+          socketXYsWk = SOCKET_IDS.map(function (socketId) { return getSocketXY(anchorBBoxSE[1], socketId); });
+          SOCKET_IDS.map(function (socketId) { return getSocketXY(anchorBBoxSE[0], socketId); })
+            .forEach(function (socketXY0) {
+              socketXYsWk.forEach(function (socketXY1) {
                 var len = getPointsLength(socketXY0, socketXY1);
                 if (len < socketsLenMin || socketsLenMin === -1) {
                   curSocketXYSE[0] = socketXY0;
@@ -1567,8 +1572,8 @@
             iAuto = 0;
           }
           curSocketXYSE[iFix] = getSocketXY(anchorBBoxSE[iFix], options.socketSE[iFix]);
-          socketXYsWk = SOCKET_IDS.map(function(socketId) { return getSocketXY(anchorBBoxSE[iAuto], socketId); });
-          socketXYsWk.forEach(function(socketXY) {
+          socketXYsWk = SOCKET_IDS.map(function (socketId) { return getSocketXY(anchorBBoxSE[iAuto], socketId); });
+          socketXYsWk.forEach(function (socketXY) {
             var len = getPointsLength(socketXY, curSocketXYSE[iFix]);
             if (len < socketsLenMin || socketsLenMin === -1) {
               curSocketXYSE[iAuto] = socketXY;
@@ -1578,7 +1583,7 @@
         }
 
         // Adjust auto-socket when no width/height
-        [0, 1].forEach(function(i) {
+        [0, 1].forEach(function (i) {
           var distanceX, distanceY;
           if (!options.socketSE[i]) {
             if (!anchorBBoxSE[i].width && !anchorBBoxSE[i].height) {
@@ -1588,11 +1593,11 @@
                 (distanceX >= 0 ? SOCKET_RIGHT : SOCKET_LEFT) :
                 (distanceY >= 0 ? SOCKET_BOTTOM : SOCKET_TOP);
             } else if (!anchorBBoxSE[i].width &&
-                (curSocketXYSE[i].socketId === SOCKET_LEFT || curSocketXYSE[i].socketId === SOCKET_RIGHT)) {
+              (curSocketXYSE[i].socketId === SOCKET_LEFT || curSocketXYSE[i].socketId === SOCKET_RIGHT)) {
               curSocketXYSE[i].socketId = curSocketXYSE[i ? 0 : 1].x - anchorBBoxSE[i].left >= 0 ?
                 SOCKET_RIGHT : SOCKET_LEFT;
             } else if (!anchorBBoxSE[i].height &&
-                (curSocketXYSE[i].socketId === SOCKET_TOP || curSocketXYSE[i].socketId === SOCKET_BOTTOM)) {
+              (curSocketXYSE[i].socketId === SOCKET_TOP || curSocketXYSE[i].socketId === SOCKET_BOTTOM)) {
               curSocketXYSE[i].socketId = curSocketXYSE[i ? 0 : 1].y - anchorBBoxSE[i].top >= 0 ?
                 SOCKET_BOTTOM : SOCKET_TOP;
             }
@@ -1606,7 +1611,7 @@
     if (curStats.position_lineStrokeWidth !== aplStats.position_lineStrokeWidth) {
       traceLog.add('position_lineStrokeWidth');
     }
-    [0, 1].forEach(function(i) {
+    [0, 1].forEach(function (i) {
       if (curStats.position_plugOverheadSE[i] !== aplStats.position_plugOverheadSE[i]) {
         traceLog.add('position_plugOverheadSE[' + i + ']');
       }
@@ -1620,12 +1625,12 @@
     // [/DEBUG]
 
     if (curStats.position_path !== aplStats.position_path ||
-        curStats.position_lineStrokeWidth !== aplStats.position_lineStrokeWidth ||
-        [0, 1].some(function(i) {
-          return curStats.position_plugOverheadSE[i] !== aplStats.position_plugOverheadSE[i] ||
-            socketXYHasChanged(curSocketXYSE[i], aplStats.position_socketXYSE[i]) ||
-            socketGravityHasChanged(curSocketGravitySE[i], aplStats.position_socketGravitySE[i]);
-        })) {
+      curStats.position_lineStrokeWidth !== aplStats.position_lineStrokeWidth ||
+      [0, 1].some(function (i) {
+        return curStats.position_plugOverheadSE[i] !== aplStats.position_plugOverheadSE[i] ||
+          socketXYHasChanged(curSocketXYSE[i], aplStats.position_socketXYSE[i]) ||
+          socketGravityHasChanged(curSocketGravitySE[i], aplStats.position_socketGravitySE[i]);
+      })) {
       // New position
       traceLog.add('new-position'); // [DEBUG/]
       props.pathList.baseVal = pathList = [];
@@ -1639,7 +1644,7 @@
           break;
 
         case PATH_ARC:
-          (function() {
+          (function () {
             var
               downward =
                 typeof curSocketGravitySE[0] === 'number' && curSocketGravitySE[0] > 0 ||
@@ -1651,28 +1656,30 @@
               crLen = getPointsLength(curSocketXYSE[0], curSocketXYSE[1]) / Math.sqrt(2) * CIRCLE_CP,
               cp1 = {
                 x: curSocketXYSE[0].x + Math.cos(cp1Angle) * crLen,
-                y: curSocketXYSE[0].y + Math.sin(cp1Angle) * crLen * -1},
+                y: curSocketXYSE[0].y + Math.sin(cp1Angle) * crLen * -1
+              },
               cp2 = {
                 x: curSocketXYSE[1].x + Math.cos(cp2Angle) * crLen,
-                y: curSocketXYSE[1].y + Math.sin(cp2Angle) * crLen * -1};
+                y: curSocketXYSE[1].y + Math.sin(cp2Angle) * crLen * -1
+              };
             pathList.push([socketXY2Point(curSocketXYSE[0]), cp1, cp2, socketXY2Point(curSocketXYSE[1])]);
           })();
           break;
 
         case PATH_FLUID:
         case PATH_MAGNET:
-          (/* @EXPORT[file:../test/spec/func/PATH_FLUID]@ */function(socketGravitySE) {
+          (/* @EXPORT[file:../test/spec/func/PATH_FLUID]@ */function (socketGravitySE) {
             var cx = [], cy = [];
-            curSocketXYSE.forEach(function(socketXY, i) {
+            curSocketXYSE.forEach(function (socketXY, i) {
               var gravity = socketGravitySE[i], offset, anotherSocketXY, overhead, minGravity, len;
               if (Array.isArray(gravity)) { // offset
-                offset = {x: gravity[0], y: gravity[1]};
+                offset = { x: gravity[0], y: gravity[1] };
               } else if (typeof gravity === 'number') { // distance
                 offset =
-                  socketXY.socketId === SOCKET_TOP ? {x: 0, y: -gravity} :
-                  socketXY.socketId === SOCKET_RIGHT ? {x: gravity, y: 0} :
-                  socketXY.socketId === SOCKET_BOTTOM ? {x: 0, y: gravity} :
-                                      /* SOCKET_LEFT */ {x: -gravity, y: 0};
+                  socketXY.socketId === SOCKET_TOP ? { x: 0, y: -gravity } :
+                    socketXY.socketId === SOCKET_RIGHT ? { x: gravity, y: 0 } :
+                      socketXY.socketId === SOCKET_BOTTOM ? { x: 0, y: gravity } :
+                                      /* SOCKET_LEFT */ { x: -gravity, y: 0 };
               } else { // auto
                 anotherSocketXY = curSocketXYSE[i ? 0 : 1];
                 overhead = curStats.position_plugOverheadSE[i];
@@ -1684,32 +1691,32 @@
                 if (socketXY.socketId === SOCKET_TOP) {
                   len = (socketXY.y - anotherSocketXY.y) / 2;
                   if (len < minGravity) { len = minGravity; }
-                  offset = {x: 0, y: -len};
+                  offset = { x: 0, y: -len };
                 } else if (socketXY.socketId === SOCKET_RIGHT) {
                   len = (anotherSocketXY.x - socketXY.x) / 2;
                   if (len < minGravity) { len = minGravity; }
-                  offset = {x: len, y: 0};
+                  offset = { x: len, y: 0 };
                 } else if (socketXY.socketId === SOCKET_BOTTOM) {
                   len = (anotherSocketXY.y - socketXY.y) / 2;
                   if (len < minGravity) { len = minGravity; }
-                  offset = {x: 0, y: len};
+                  offset = { x: 0, y: len };
                 } else { // SOCKET_LEFT
                   len = (socketXY.x - anotherSocketXY.x) / 2;
                   if (len < minGravity) { len = minGravity; }
-                  offset = {x: -len, y: 0};
+                  offset = { x: -len, y: 0 };
                 }
               }
               cx[i] = socketXY.x + offset.x;
               cy[i] = socketXY.y + offset.y;
             });
             pathList.push([socketXY2Point(curSocketXYSE[0]),
-              {x: cx[0], y: cy[0]}, {x: cx[1], y: cy[1]}, socketXY2Point(curSocketXYSE[1])]);
+            { x: cx[0], y: cy[0] }, { x: cx[1], y: cy[1] }, socketXY2Point(curSocketXYSE[1])]);
           }/* @/EXPORT@ */)([curSocketGravitySE[0],
-            curStats.position_path === PATH_MAGNET ? 0 : curSocketGravitySE[1]]);
+          curStats.position_path === PATH_MAGNET ? 0 : curSocketGravitySE[1]]);
           break;
 
         case PATH_GRID:
-          (/* @EXPORT[file:../test/spec/func/PATH_GRID]@ */function() {
+          (/* @EXPORT[file:../test/spec/func/PATH_GRID]@ */function () {
             /**
              * @typedef {Object} DirPoint
              * @property {number} dirId - DIR_UP, DIR_RIGHT, DIR_DOWN, DIR_LEFT
@@ -1723,7 +1730,7 @@
             function reverseDir(dirId) {
               return dirId === DIR_UP ? DIR_DOWN :
                 dirId === DIR_RIGHT ? DIR_LEFT :
-                dirId === DIR_DOWN ? DIR_UP : DIR_RIGHT;
+                  dirId === DIR_DOWN ? DIR_UP : DIR_RIGHT;
             }
 
             function getAxis(dirId) {
@@ -1731,7 +1738,7 @@
             }
 
             function getNextDirPoint(dirPoint, len, dirId) {
-              var newDirPoint = {x: dirPoint.x, y: dirPoint.y};
+              var newDirPoint = { x: dirPoint.x, y: dirPoint.y };
               if (dirId) {
                 if (dirId === reverseDir(dirPoint.dirId)) { throw new Error('Invalid dirId: ' + dirId); }
                 newDirPoint.dirId = dirId;
@@ -1754,8 +1761,8 @@
             function inAxisScope(point, dirPoint) {
               return dirPoint.dirId === DIR_UP ? point.y <= dirPoint.y :
                 dirPoint.dirId === DIR_RIGHT ? point.x >= dirPoint.x :
-                dirPoint.dirId === DIR_DOWN ? point.y >= dirPoint.y :
-                  point.x <= dirPoint.x;
+                  dirPoint.dirId === DIR_DOWN ? point.y >= dirPoint.y :
+                    point.x <= dirPoint.x;
             }
 
             function onAxisLine(point, dirPoint) {
@@ -1765,7 +1772,7 @@
 
             // Must `scopeContains[0] !== scopeContains[1]`
             function getIndexWithScope(scopeContains) {
-              return scopeContains[0] ? {contain: 0, notContain: 1} : {contain: 1, notContain: 0};
+              return scopeContains[0] ? { contain: 0, notContain: 1 } : { contain: 1, notContain: 0 };
             }
 
             function getAxisDistance(point1, point2, axis) {
@@ -1781,8 +1788,8 @@
 
             function joinPoints() {
               var scopeContains = [
-                  inAxisScope(curDirPoint[1], curDirPoint[0]),
-                  inAxisScope(curDirPoint[0], curDirPoint[1])],
+                inAxisScope(curDirPoint[1], curDirPoint[0]),
+                inAxisScope(curDirPoint[0], curDirPoint[1])],
                 axis = [getAxis(curDirPoint[0].dirId), getAxis(curDirPoint[1].dirId)],
                 center, axisScope, distance, points;
 
@@ -1822,7 +1829,7 @@
                 } else { // turn both 90deg
                   distance =
                     getAxisDistance(curDirPoint[0], curDirPoint[1], axis[0] === 'x' ? 'y' : 'x');
-                  dpList.forEach(function(targetDpList, iTarget) {
+                  dpList.forEach(function (targetDpList, iTarget) {
                     var iAnother = iTarget === 0 ? 1 : 0;
                     targetDpList.push(curDirPoint[iTarget]);
                     curDirPoint[iTarget] = getNextDirPoint(curDirPoint[iTarget], MIN_GRID_LEN,
@@ -1841,8 +1848,8 @@
                     dpList[0].push(curDirPoint[0]); // Drop curDirPoint[1]
                   } else { // Drop curDirPoint[0] and end
                     dpList[0].push(axis[0] === 'x' ?
-                      {x: curDirPoint[1].x, y: curDirPoint[0].y} :
-                      {x: curDirPoint[0].x, y: curDirPoint[1].y});
+                      { x: curDirPoint[1].x, y: curDirPoint[0].y } :
+                      { x: curDirPoint[0].x, y: curDirPoint[1].y });
                   }
                   return false;
 
@@ -1852,15 +1859,15 @@
                   curDirPoint[axisScope.notContain] =
                     getNextDirPoint(curDirPoint[axisScope.notContain], MIN_GRID_LEN,
                       getAxisDistance(curDirPoint[axisScope.notContain],
-                          curDirPoint[axisScope.contain], axis[axisScope.contain]) >= MIN_GRID_LEN ?
+                        curDirPoint[axisScope.contain], axis[axisScope.contain]) >= MIN_GRID_LEN ?
                         getDirIdWithAxis(curDirPoint[axisScope.notContain], curDirPoint[axisScope.contain],
                           axis[axisScope.contain]) :
                         curDirPoint[axisScope.contain].dirId);
 
                 } else { // turn both 90deg
-                  points = [{x: curDirPoint[0].x, y: curDirPoint[0].y},
-                    {x: curDirPoint[1].x, y: curDirPoint[1].y}];
-                  dpList.forEach(function(targetDpList, iTarget) {
+                  points = [{ x: curDirPoint[0].x, y: curDirPoint[0].y },
+                  { x: curDirPoint[1].x, y: curDirPoint[1].y }];
+                  dpList.forEach(function (targetDpList, iTarget) {
                     var iAnother = iTarget === 0 ? 1 : 0,
                       distance = getAxisDistance(points[iTarget], points[iAnother], axis[iTarget]);
                     if (distance < MIN_GRID_LEN) {
@@ -1875,30 +1882,30 @@
               return true;
             }
 
-            curSocketXYSE.forEach(function(socketXY, i) {
+            curSocketXYSE.forEach(function (socketXY, i) {
               var dirPoint = socketXY2Point(socketXY),
                 len = curSocketGravitySE[i];
-              (function(dirLen) {
+              (function (dirLen) {
                 dirPoint.dirId = dirLen[0];
                 len = dirLen[1];
               })(Array.isArray(len) ? ( // offset
-                  len[0] < 0 ? [DIR_LEFT, -len[0]] : // ignore Y
+                len[0] < 0 ? [DIR_LEFT, -len[0]] : // ignore Y
                   len[0] > 0 ? [DIR_RIGHT, len[0]] : // ignore Y
-                  len[1] < 0 ? [DIR_UP, -len[1]] :
-                  len[1] > 0 ? [DIR_DOWN, len[1]] :
-                                [socketXY.socketId, 0] // (0, 0)
-                ) :
+                    len[1] < 0 ? [DIR_UP, -len[1]] :
+                      len[1] > 0 ? [DIR_DOWN, len[1]] :
+                        [socketXY.socketId, 0] // (0, 0)
+              ) :
                 typeof len !== 'number' ? [socketXY.socketId, MIN_GRID_LEN] : // auto
-                len >= 0 ? [socketXY.socketId, len] : // distance
-                            [reverseDir(socketXY.socketId), -len]);
+                  len >= 0 ? [socketXY.socketId, len] : // distance
+                    [reverseDir(socketXY.socketId), -len]);
               dpList[i].push(dirPoint);
               curDirPoint[i] = getNextDirPoint(dirPoint, len);
             });
             while (joinPoints()) { /* empty */ }
 
             dpList[1].reverse();
-            dpList[0].concat(dpList[1]).forEach(function(dirPoint, i) {
-              var point = {x: dirPoint.x, y: dirPoint.y};
+            dpList[0].concat(dpList[1]).forEach(function (dirPoint, i) {
+              var point = { x: dirPoint.x, y: dirPoint.y };
               if (i > 0) { pathList.push([curPoint, point]); }
               curPoint = point;
             });
@@ -1909,9 +1916,9 @@
       }
 
       // Adjust path with plugs
-      (function() {
+      (function () {
         var pathSegsLen = [];
-        curStats.position_plugOverheadSE.forEach(function(plugOverhead, i) {
+        curStats.position_plugOverheadSE.forEach(function (plugOverhead, i) {
           var start = !i, pathPoints, iSeg, point, sp, cp, angle, len,
             socketId, axis, dir, minAdjustOffset;
           if (plugOverhead > 0) {
@@ -1972,7 +1979,7 @@
               pathPoints[start ? 0 : pathPoints.length - 1][axis] += dir;
             } else { // Cubic bezier
               (start ? [0, 1] : [pathPoints.length - 2, pathPoints.length - 1]).forEach(
-                function(i) { pathPoints[i][axis] += dir; });
+                function (i) { pathPoints[i][axis] += dir; });
             }
             pathSegsLen[iSeg] = null; // to re-calculate
           }
@@ -1988,7 +1995,7 @@
       updated = true;
 
       if (props.events.apl_position) {
-        props.events.apl_position.forEach(function(handler) { handler(props, pathList); });
+        props.events.apl_position.forEach(function (handler) { handler(props, pathList); });
       }
     }
 
@@ -2011,7 +2018,7 @@
     if (pathList) {
       curEdge.x1 = curEdge.x2 = pathList[0][0].x;
       curEdge.y1 = curEdge.y2 = pathList[0][0].y;
-      curStats.path_pathData = curPathData = pathList2PathData(pathList, function(point) {
+      curStats.path_pathData = curPathData = pathList2PathData(pathList, function (point) {
         if (point.x < curEdge.x1) { curEdge.x1 = point.x; }
         if (point.y < curEdge.y1) { curEdge.y1 = point.y; }
         if (point.x > curEdge.x2) { curEdge.x2 = point.x; }
@@ -2036,7 +2043,7 @@
         }
 
         if (props.events.apl_path) {
-          props.events.apl_path.forEach(function(handler) { handler(props, curPathData); });
+          props.events.apl_path.forEach(function (handler) { handler(props, curPathData); });
         }
       }
     }
@@ -2061,10 +2068,12 @@
     // Expand bBox with `line` or symbols, and event
     padding = Math.max(curStats.line_strokeWidth / 2,
       curStats.viewBox_plugBCircleSE[0] || 0, curStats.viewBox_plugBCircleSE[1] || 0);
-    edge = {x1: curEdge.x1 - padding, y1: curEdge.y1 - padding,
-      x2: curEdge.x2 + padding, y2: curEdge.y2 + padding};
+    edge = {
+      x1: curEdge.x1 - padding, y1: curEdge.y1 - padding,
+      x2: curEdge.x2 + padding, y2: curEdge.y2 + padding
+    };
     if (props.events.new_edge4viewBox) {
-      props.events.new_edge4viewBox.forEach(function(handler) { handler(props, edge); });
+      props.events.new_edge4viewBox.forEach(function (handler) { handler(props, edge); });
     }
 
     curBBox.x = curStats.lineMask_x = curStats.lineOutlineMask_x = curStats.maskBGRect_x = edge.x1;
@@ -2072,7 +2081,7 @@
     curBBox.width = edge.x2 - edge.x1;
     curBBox.height = edge.y2 - edge.y1;
 
-    ['x', 'y', 'width', 'height'].forEach(function(boxKey) {
+    ['x', 'y', 'width', 'height'].forEach(function (boxKey) {
       var value;
       if ((value = curBBox[boxKey]) !== aplBBox[boxKey]) {
         traceLog.add(boxKey); // [DEBUG/]
@@ -2099,7 +2108,7 @@
       updated = false;
 
     if (curStats.plug_enabled) {
-      [0, 1].forEach(function(i) {
+      [0, 1].forEach(function (i) {
         curStats.capsMaskMarker_enabledSE[i] =
           curStats.plug_enabledSE[i] && curStats.plug_colorTraSE[i] ||
           curStats.plugOutline_enabledSE[i] && curStats.plugOutline_colorTraSE[i];
@@ -2120,7 +2129,7 @@
 
     if (lineMaskBGEnabled || curStats.lineOutline_enabled) {
       // maskBGRect_x, maskBGRect_y
-      ['x', 'y'].forEach(function(boxKey) {
+      ['x', 'y'].forEach(function (boxKey) {
         var statKey = 'maskBGRect_' + boxKey;
         if (setStat(props, aplStats, statKey, (value = curStats[statKey])
             /* [DEBUG] */, null, statKey + '%_'/* [/DEBUG] */)) {
@@ -2153,7 +2162,7 @@
       }
 
       // lineMask_x, lineMask_y
-      ['x', 'y'].forEach(function(boxKey) {
+      ['x', 'y'].forEach(function (boxKey) {
         var statKey = 'lineMask_' + boxKey;
         if (setStat(props, aplStats, statKey, (value = curStats[statKey])
             /* [DEBUG] */, null, statKey + '%_'/* [/DEBUG] */)) {
@@ -2174,7 +2183,7 @@
       if (curStats.caps_enabled) {
 
         // capsMaskAnchor
-        [0, 1].forEach(function(i) {
+        [0, 1].forEach(function (i) {
           var curPathData;
 
           if (setStat(props, aplStats.capsMaskAnchor_enabledSE, i, (value = curStats.capsMaskAnchor_enabledSE[i])
@@ -2189,7 +2198,7 @@
           if (curStats.capsMaskAnchor_enabledSE[i]) {
             // capsMaskAnchor_pathDataSE
             if (pathDataHasChanged((curPathData = curStats.capsMaskAnchor_pathDataSE[i]),
-                aplStats.capsMaskAnchor_pathDataSE[i])) {
+              aplStats.capsMaskAnchor_pathDataSE[i])) {
               traceLog.add('capsMaskAnchor_pathDataSE[' + i + ']'); // [DEBUG/]
               props.capsMaskAnchorSE[i].setPathData(curPathData);
               aplStats.capsMaskAnchor_pathDataSE[i] = curPathData;
@@ -2198,7 +2207,7 @@
 
             // capsMaskAnchor_strokeWidthSE
             if (setStat(props, aplStats.capsMaskAnchor_strokeWidthSE, i,
-                (value = curStats.capsMaskAnchor_strokeWidthSE[i])
+              (value = curStats.capsMaskAnchor_strokeWidthSE[i])
                 /* [DEBUG] */, null, 'capsMaskAnchor_strokeWidthSE[' + i + ']=%s'/* [/DEBUG] */)) {
               props.capsMaskAnchorSE[i].style.strokeWidth = value + 'px';
               updated = true;
@@ -2214,7 +2223,7 @@
         if (curStats.capsMaskMarker_enabled) {
 
           // capsMaskMarker
-          [0, 1].forEach(function(i) {
+          [0, 1].forEach(function (i) {
             var plugId = curStats.capsMaskMarker_plugSE[i],
               symbolConf = plugId !== PLUG_BEHIND ? SYMBOLS[PLUG_2_SYMBOL[plugId]] : null,
               marker = getMarkerProps(i, symbolConf);
@@ -2243,7 +2252,7 @@
               }
 
               // capsMaskMarker_markerWidthSE, capsMaskMarker_markerHeightSE
-              ['markerWidth', 'markerHeight'].forEach(function(markerKey) {
+              ['markerWidth', 'markerHeight'].forEach(function (markerKey) {
                 var statKey = 'capsMaskMarker_' + markerKey + 'SE';
                 if (setStat(props, aplStats[statKey], i, (value = curStats[statKey][i])
                     /* [DEBUG] */, null, statKey + '[' + i + ']%_'/* [/DEBUG] */)) {
@@ -2259,7 +2268,7 @@
 
     if (curStats.lineOutline_enabled) {
       // lineOutlineMask_x, lineOutlineMask_y
-      ['x', 'y'].forEach(function(boxKey) {
+      ['x', 'y'].forEach(function (boxKey) {
         var statKey = 'lineOutlineMask_' + boxKey;
         if (setStat(props, aplStats, statKey, (value = curStats[statKey])
             /* [DEBUG] */, null, statKey + '%_'/* [/DEBUG] */)) {
@@ -2286,7 +2295,7 @@
       if (!!on !== !!props.isShown) { props.svg.style.visibility = on ? '' : 'hidden'; }
       props.isShown = on;
       if (props.events && props.events.svgShow) {
-        props.events.svgShow.forEach(function(handler) { handler(props, on); });
+        props.events.svgShow.forEach(function (handler) { handler(props, on); });
       }
     }
     traceLog.add('</svgShow>'); // [DEBUG/]
@@ -2301,7 +2310,7 @@
     traceLog.add('<setEffect>'); // [DEBUG/]
     var curStats = props.curStats, aplStats = props.aplStats, enabled;
 
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var effectConf = EFFECTS[effectName],
         keyEnabled = effectName + '_enabled', keyOptions = effectName + '_options',
         curOptions = curStats[keyOptions];
@@ -2369,7 +2378,7 @@
 
     // [DEBUG]
     traceLog.add('<update>');
-    Object.keys(updated).forEach(function(key) {
+    Object.keys(updated).forEach(function (key) {
       if (updated[key]) { traceLog.add('updated.' + key); }
     });
     traceLog.add('</update>');
@@ -2389,7 +2398,7 @@
     var curStats = props.curStats, aplStats = props.aplStats, update = {}, timeRatio;
 
     function applyStats() {
-      ['show_on', 'show_effect', 'show_animOptions'].forEach(function(statName) {
+      ['show_on', 'show_effect', 'show_animOptions'].forEach(function (statName) {
         aplStats[statName] = curStats[statName];
       });
     }
@@ -2426,7 +2435,7 @@
 
     // [DEBUG]
     traceLog.add('<show>');
-    Object.keys(update).forEach(function(key) {
+    Object.keys(update).forEach(function (key) {
       if (update[key]) { traceLog.add('update.' + key); }
     });
     traceLog.add('</show>');
@@ -2440,9 +2449,9 @@
    * @returns {boolean} `true` when binding succeeded.
    */
   function bindAttachment(props, attachProps, optionName) {
-    var bindTarget = {props: props, optionName: optionName};
+    var bindTarget = { props: props, optionName: optionName };
     if (props.attachments.indexOf(attachProps) < 0 &&
-        (!attachProps.conf.bind || attachProps.conf.bind(attachProps, bindTarget))) {
+      (!attachProps.conf.bind || attachProps.conf.bind(attachProps, bindTarget))) {
       props.attachments.push(attachProps);
       attachProps.boundTargets.push(bindTarget);
       return true;
@@ -2460,7 +2469,7 @@
     var i = props.attachments.indexOf(attachProps);
     if (i > -1) { props.attachments.splice(i, 1); }
 
-    if (attachProps.boundTargets.some(function(boundTarget, iTarget) {
+    if (attachProps.boundTargets.some(function (boundTarget, iTarget) {
       if (boundTarget.props === props) {
         if (attachProps.conf.unbind) { attachProps.conf.unbind(attachProps, boundTarget); }
         i = iTarget;
@@ -2470,7 +2479,7 @@
     })) {
       attachProps.boundTargets.splice(i, 1);
       if (!dontRemove) {
-        addDelayedProc(function() { // Do it after all binding and unbinding.
+        addDelayedProc(function () { // Do it after all binding and unbinding.
           if (!attachProps.boundTargets.length) { removeAttachment(attachProps); }
         });
       }
@@ -2527,10 +2536,10 @@
     function setValidId(root, newOptions, propName, key2Id, optionName, index, defaultValue) {
       var curOption = getCurOption(root, propName, optionName, index, defaultValue), updated, key, id;
       if (newOptions[propName] != null &&
-          (key = (newOptions[propName] + '').toLowerCase()) && (
-            curOption.acceptsAuto && key === KEYWORD_AUTO ||
-            (id = key2Id[key])
-          ) && id !== curOption.container[curOption.key]) {
+        (key = (newOptions[propName] + '').toLowerCase()) && (
+          curOption.acceptsAuto && key === KEYWORD_AUTO ||
+          (id = key2Id[key])
+        ) && id !== curOption.container[curOption.key]) {
         curOption.container[curOption.key] = id; // `undefined` when `KEYWORD_AUTO`
         updated = true;
       }
@@ -2551,11 +2560,11 @@
         type = typeof curOption.default;
       }
       if (newOptions[propName] != null && (
-            curOption.acceptsAuto && (newOptions[propName] + '').toLowerCase() === KEYWORD_AUTO ||
-            isValidType((value = newOptions[propName]), type) &&
-            ((value = trim && type === 'string' && value ? value.trim() : value) || true) &&
-            (!check || check(value))
-          ) && value !== curOption.container[curOption.key]) {
+        curOption.acceptsAuto && (newOptions[propName] + '').toLowerCase() === KEYWORD_AUTO ||
+        isValidType((value = newOptions[propName]), type) &&
+        ((value = trim && type === 'string' && value ? value.trim() : value) || true) &&
+        (!check || check(value))
+      ) && value !== curOption.container[curOption.key]) {
         curOption.container[curOption.key] = value; // `undefined` when `KEYWORD_AUTO`
         updated = true;
       }
@@ -2569,11 +2578,11 @@
     newOptions = newOptions || {};
 
     // anchorSE
-    ['start', 'end'].forEach(function(optionName, i) {
+    ['start', 'end'].forEach(function (optionName, i) {
       var newOption = newOptions[optionName], newIsAttachment = false;
       if (newOption &&
-          (isElement(newOption) || (newIsAttachment = isAttachment(newOption, 'anchor'))) &&
-          newOption !== options.anchorSE[i]) {
+        (isElement(newOption) || (newIsAttachment = isAttachment(newOption, 'anchor'))) &&
+        newOption !== options.anchorSE[i]) {
 
         if (props.optionIsAttach.anchorSE[i] !== false) {
           unbindAttachment(props, insAttachProps[options.anchorSE[i]._id]); // Unbind old
@@ -2593,12 +2602,12 @@
 
     // Check window.
     if (needsWindow &&
-        (newWindow = getCommonWindow(
-          props.optionIsAttach.anchorSE[0] !== false ?
-            insAttachProps[options.anchorSE[0]._id].element : options.anchorSE[0],
-          props.optionIsAttach.anchorSE[1] !== false ?
-            insAttachProps[options.anchorSE[1]._id].element : options.anchorSE[1]
-        )) !== props.baseWindow) {
+      (newWindow = getCommonWindow(
+        props.optionIsAttach.anchorSE[0] !== false ?
+          insAttachProps[options.anchorSE[0]._id].element : options.anchorSE[0],
+        props.optionIsAttach.anchorSE[1] !== false ?
+          insAttachProps[options.anchorSE[1]._id].element : options.anchorSE[1]
+      )) !== props.baseWindow) {
       bindWindow(props, newWindow);
       needs.line = needs.plug = needs.lineOutline = needs.plugOutline = needs.faces = needs.effect = true;
     }
@@ -2611,11 +2620,11 @@
       SOCKET_KEY_2_ID, 'socketSE', 1) || needs.position;
 
     // socketGravitySE
-    [newOptions.startSocketGravity, newOptions.endSocketGravity].forEach(function(newOption, i) {
+    [newOptions.startSocketGravity, newOptions.endSocketGravity].forEach(function (newOption, i) {
 
       function matchArray(array1, array2) {
         return array1.length === array2.length &&
-          array1.every(function(value1, i) { return value1 === array2[i]; });
+          array1.every(function (value1, i) { return value1 === array2[i]; });
       }
 
       var value = false; // `false` means no-update input.
@@ -2646,17 +2655,17 @@
       null, 'lineColor', null, DEFAULT_OPTIONS.lineColor, null, true) || needs.line;
     needs.line = setValidType(options, newOptions, 'size',
       null, 'lineSize', null, DEFAULT_OPTIONS.lineSize,
-      function(value) { return value > 0; }) || needs.line;
+      function (value) { return value > 0; }) || needs.line;
 
     // Plug
-    ['startPlug', 'endPlug'].forEach(function(propName, i) {
+    ['startPlug', 'endPlug'].forEach(function (propName, i) {
       needs.plug = setValidId(options, newOptions, propName,
         PLUG_KEY_2_ID, 'plugSE', i, DEFAULT_OPTIONS.plugSE[i]) || needs.plug;
       needs.plug = setValidType(options, newOptions, propName + 'Color',
         'string', 'plugColorSE', i, null, null, true) || needs.plug;
       needs.plug = setValidType(options, newOptions, propName + 'Size',
         null, 'plugSizeSE', i, DEFAULT_OPTIONS.plugSizeSE[i],
-        function(value) { return value > 0; }) || needs.plug;
+        function (value) { return value > 0; }) || needs.plug;
     });
 
     // LineOutline
@@ -2666,10 +2675,10 @@
       null, 'lineOutlineColor', null, DEFAULT_OPTIONS.lineOutlineColor, null, true) || needs.lineOutline;
     needs.lineOutline = setValidType(options, newOptions, 'outlineSize',
       null, 'lineOutlineSize', null, DEFAULT_OPTIONS.lineOutlineSize,
-      function(value) { return value > 0 && value <= 0.48; }) || needs.lineOutline;
+      function (value) { return value > 0 && value <= 0.48; }) || needs.lineOutline;
 
     // PlugOutline
-    ['startPlugOutline', 'endPlugOutline'].forEach(function(propName, i) {
+    ['startPlugOutline', 'endPlugOutline'].forEach(function (propName, i) {
       needs.plugOutline = setValidType(options, newOptions, propName,
         null, 'plugOutlineEnabledSE', i, DEFAULT_OPTIONS.plugOutlineEnabledSE[i]) || needs.plugOutline;
       needs.plugOutline = setValidType(options, newOptions, propName + 'Color',
@@ -2677,11 +2686,11 @@
       // `outlineMax` is checked in `updatePlugOutline`.
       needs.plugOutline = setValidType(options, newOptions, propName + 'Size',
         null, 'plugOutlineSizeSE', i, DEFAULT_OPTIONS.plugOutlineSizeSE[i],
-        function(value) { return value >= 1; }) || needs.plugOutline;
+        function (value) { return value >= 1; }) || needs.plugOutline;
     });
 
     // label
-    ['startLabel', 'endLabel', 'middleLabel'].forEach(function(optionName, i) {
+    ['startLabel', 'endLabel', 'middleLabel'].forEach(function (optionName, i) {
       var newOption = newOptions[optionName],
         oldOption = options.labelSEM[i] && !props.optionIsAttach.labelSEM[i] ?
           insAttachProps[options.labelSEM[i]._id].text : options.labelSEM[i],
@@ -2689,7 +2698,7 @@
 
       if ((plain = typeof newOption === 'string')) { newOption = newOption.trim(); }
       if ((plain || newOption && (newIsAttachment = isAttachment(newOption, 'label'))) &&
-          newOption !== oldOption) {
+        newOption !== oldOption) {
 
         if (options.labelSEM[i]) {
           unbindAttachment(props, insAttachProps[options.labelSEM[i]._id]); // Unbind old
@@ -2702,7 +2711,7 @@
             // Only one target can be bound.
             attachProps = insAttachProps[label._id];
             attachProps.boundTargets.slice().forEach( // Copy boundTargets because removeOption may change array.
-              function(boundTarget) { attachProps.conf.removeOption(attachProps, boundTarget); });
+              function (boundTarget) { attachProps.conf.removeOption(attachProps, boundTarget); });
           } else {
             label = new LeaderLineAttachment(ATTACHMENTS.captionLabel, [newOption]);
           }
@@ -2716,18 +2725,18 @@
     });
 
     // effect
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var effectConf = EFFECTS[effectName],
         keyEnabled = effectName + '_enabled', keyOptions = effectName + '_options',
         newOption, optionValue;
 
       function getValidOptions(newEffectOptions) {
         var effectOptions = {};
-        effectConf.optionsConf.forEach(function(optionConf) {
+        effectConf.optionsConf.forEach(function (optionConf) {
           var optionClass = optionConf[0], optionName = optionConf[3], i = optionConf[4];
           if (i != null && !effectOptions[optionName]) { effectOptions[optionName] = []; }
           (typeof optionClass === 'function' ? optionClass :
-              optionClass === 'id' ? setValidId : setValidType)
+            optionClass === 'id' ? setValidId : setValidType)
             .apply(null, [effectOptions, newEffectOptions].concat(optionConf.slice(1)));
         });
         return effectOptions;
@@ -2779,7 +2788,7 @@
 
     // [DEBUG]
     traceLog.add('<setOptions>');
-    Object.keys(needs).forEach(function(key) { if (needs[key]) { traceLog.add('needs.' + key); } });
+    Object.keys(needs).forEach(function (key) { if (needs[key]) { traceLog.add('needs.' + key); } });
     traceLog.add('</setOptions>');
     // [/DEBUG]
 
@@ -2809,15 +2818,15 @@
   /** @type {{effectName: string, EffectConf}} */
   EFFECTS = {
     dash: {
-      stats: {dash_len: {}, dash_gap: {}, dash_maxOffset: {}},
-      anim: true, defaultAnimOptions: {duration: 1000, timing: 'linear'},
+      stats: { dash_len: {}, dash_gap: {}, dash_maxOffset: {} },
+      anim: true, defaultAnimOptions: { duration: 1000, timing: 'linear' },
 
       optionsConf: [
-        ['type', 'len', 'number', null, null, null, function(value) { return value > 0; }],
-        ['type', 'gap', 'number', null, null, null, function(value) { return value > 0; }]
+        ['type', 'len', 'number', null, null, null, function (value) { return value > 0; }],
+        ['type', 'gap', 'number', null, null, null, function (value) { return value > 0; }]
       ],
 
-      init: function(props) {
+      init: function (props) {
         traceLog.add('<EFFECTS.dash.init>'); // [DEBUG/]
         addEventHandler(props, 'apl_line_strokeWidth', EFFECTS.dash.update);
         props.lineFace.style.strokeDashoffset = 0;
@@ -2825,7 +2834,7 @@
         traceLog.add('</EFFECTS.dash.init>'); // [DEBUG/]
       },
 
-      remove: function(props) {
+      remove: function (props) {
         traceLog.add('<EFFECTS.dash.remove>'); // [DEBUG/]
         var curStats = props.curStats;
         removeEventHandler(props, 'apl_line_strokeWidth', EFFECTS.dash.update);
@@ -2839,7 +2848,7 @@
         traceLog.add('</EFFECTS.dash.remove>'); // [DEBUG/]
       },
 
-      update: function(props) {
+      update: function (props) {
         traceLog.add('<EFFECTS.dash.update>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats,
           effectOptions = aplStats.dash_options,
@@ -2859,8 +2868,8 @@
           update = setStat(props, aplStats, 'dash_maxOffset', curStats.dash_maxOffset);
 
           if (aplStats.dash_animOptions && ( // ON -> ON (update)
-              // Normally, animOptions is not changed because the effect was removed when it was changed.
-              update || hasChanged(curStats.dash_animOptions, aplStats.dash_animOptions))) {
+            // Normally, animOptions is not changed because the effect was removed when it was changed.
+            update || hasChanged(curStats.dash_animOptions, aplStats.dash_animOptions))) {
             traceLog.add('anim.remove'); // [DEBUG/]
             if (curStats.dash_animId) {
               timeRatio = anim.stop(curStats.dash_animId);
@@ -2872,8 +2881,8 @@
           if (!aplStats.dash_animOptions) { // OFF -> ON
             traceLog.add('anim.add'); // [DEBUG/]
             curStats.dash_animId = anim.add(
-              function(outputRatio) { return (1 - outputRatio) * aplStats.dash_maxOffset + 'px'; },
-              function(value) { props.lineFace.style.strokeDashoffset = value; },
+              function (outputRatio) { return (1 - outputRatio) * aplStats.dash_maxOffset + 'px'; },
+              function (value) { props.lineFace.style.strokeDashoffset = value; },
               curStats.dash_animOptions.duration, 0, curStats.dash_animOptions.timing, false, timeRatio);
             aplStats.dash_animOptions = copyTree(curStats.dash_animOptions);
           }
@@ -2894,14 +2903,14 @@
     },
 
     gradient: {
-      stats: {gradient_colorSE: {hasSE: true}, gradient_pointSE: {hasSE: true, hasProps: true}},
+      stats: { gradient_colorSE: { hasSE: true }, gradient_pointSE: { hasSE: true, hasProps: true } },
 
       optionsConf: [
         ['type', 'startColor', 'string', 'colorSE', 0, null, null, true],
         ['type', 'endColor', 'string', 'colorSE', 1, null, null, true]
       ],
 
-      init: function(props) {
+      init: function (props) {
         traceLog.add('<EFFECTS.gradient.init>'); // [DEBUG/]
         var baseDocument = props.baseWindow.document, defs = props.defs, element,
           id = APP_ID + '-' + props._id + '-gradient';
@@ -2910,10 +2919,10 @@
           defs.appendChild(baseDocument.createElementNS(SVG_NS, 'linearGradient'));
         element.id = id;
         element.gradientUnits.baseVal = SVGUnitTypes.SVG_UNIT_TYPE_USERSPACEONUSE;
-        [element.x1, element.y1, element.x2, element.y2].forEach(function(len) {
+        [element.x1, element.y1, element.x2, element.y2].forEach(function (len) {
           len.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX, 0);
         });
-        props.efc_gradient_stopSE = [0, 1].map(function(i) {
+        props.efc_gradient_stopSE = [0, 1].map(function (i) {
           var element = props.efc_gradient_gradient.appendChild(baseDocument.createElementNS(SVG_NS, 'stop'));
           try {
             element.offset.baseVal = i; // offset === index
@@ -2935,7 +2944,7 @@
         traceLog.add('</EFFECTS.gradient.init>'); // [DEBUG/]
       },
 
-      remove: function(props) {
+      remove: function (props) {
         traceLog.add('<EFFECTS.gradient.remove>'); // [DEBUG/]
         if (props.efc_gradient_gradient) {
           props.defs.removeChild(props.efc_gradient_gradient);
@@ -2950,24 +2959,24 @@
         traceLog.add('</EFFECTS.gradient.remove>'); // [DEBUG/]
       },
 
-      update: function(props) {
+      update: function (props) {
         traceLog.add('<EFFECTS.gradient.update>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats,
           effectOptions = aplStats.gradient_options,
           pathList = props.pathList.animVal || props.pathList.baseVal,
           pathSeg, point;
 
-        [0, 1].forEach(function(i) {
+        [0, 1].forEach(function (i) {
           curStats.gradient_colorSE[i] = effectOptions.colorSE[i] || curStats.plug_colorSE[i];
         });
 
         point = pathList[0][0];
-        curStats.gradient_pointSE[0] = {x: point.x, y: point.y}; // first point of first seg
+        curStats.gradient_pointSE[0] = { x: point.x, y: point.y }; // first point of first seg
         pathSeg = pathList[pathList.length - 1];
         point = pathSeg[pathSeg.length - 1];
-        curStats.gradient_pointSE[1] = {x: point.x, y: point.y}; // last point of last seg
+        curStats.gradient_pointSE[1] = { x: point.x, y: point.y }; // last point of last seg
 
-        [0, 1].forEach(function(i) {
+        [0, 1].forEach(function (i) {
           var value;
 
           if (setStat(props, aplStats.gradient_colorSE, i, (value = curStats.gradient_colorSE[i])
@@ -2982,7 +2991,7 @@
             }
           }
 
-          ['x', 'y'].forEach(function(pointKey) {
+          ['x', 'y'].forEach(function (pointKey) {
             if ((value = curStats.gradient_pointSE[i][pointKey]) !== aplStats.gradient_pointSE[i][pointKey]) {
               traceLog.add('gradient_pointSE[' + i + '].' + pointKey); // [DEBUG/]
               props.efc_gradient_gradient[pointKey + (i + 1)].baseVal.value =
@@ -2995,27 +3004,29 @@
     },
 
     dropShadow: {
-      stats: {dropShadow_dx: {}, dropShadow_dy: {}, dropShadow_blur: {},
-        dropShadow_color: {}, dropShadow_opacity: {}, dropShadow_x: {}, dropShadow_y: {}},
+      stats: {
+        dropShadow_dx: {}, dropShadow_dy: {}, dropShadow_blur: {},
+        dropShadow_color: {}, dropShadow_opacity: {}, dropShadow_x: {}, dropShadow_y: {}
+      },
 
       optionsConf: [
         ['type', 'dx', null, null, null, 2],
         ['type', 'dy', null, null, null, 4],
-        ['type', 'blur', null, null, null, 3, function(value) { return value >= 0; }],
+        ['type', 'blur', null, null, null, 3, function (value) { return value >= 0; }],
         ['type', 'color', null, null, null, '#000', null, true],
-        ['type', 'opacity', null, null, null, 0.8, function(value) { return value >= 0 && value <= 1; }]
+        ['type', 'opacity', null, null, null, 0.8, function (value) { return value >= 0 && value <= 1; }]
       ],
 
-      init: function(props) {
+      init: function (props) {
         traceLog.add('<EFFECTS.dropShadow.init>'); // [DEBUG/]
         var baseDocument = props.baseWindow.document, defs = props.defs,
           id = APP_ID + '-' + props._id + '-dropShadow',
           dropShadow = newDropShadow(baseDocument, id);
 
         ['elmFilter', 'elmOffset', 'elmBlur', 'styleFlood', 'elmsAppend']
-          .forEach(function(key) { props['efc_dropShadow_' + key] = dropShadow[key]; });
+          .forEach(function (key) { props['efc_dropShadow_' + key] = dropShadow[key]; });
 
-        dropShadow.elmsAppend.forEach(function(elm) { defs.appendChild(elm); });
+        dropShadow.elmsAppend.forEach(function (elm) { defs.appendChild(elm); });
         props.face.setAttribute('filter', 'url(#' + id + ')');
 
         addEventHandler(props, 'new_edge4viewBox', EFFECTS.dropShadow.adjustEdge);
@@ -3023,11 +3034,11 @@
         traceLog.add('</EFFECTS.dropShadow.init>'); // [DEBUG/]
       },
 
-      remove: function(props) {
+      remove: function (props) {
         traceLog.add('<EFFECTS.dropShadow.remove>'); // [DEBUG/]
         var defs = props.defs;
         if (props.efc_dropShadow_elmsAppend) {
-          props.efc_dropShadow_elmsAppend.forEach(function(elm) { defs.removeChild(elm); });
+          props.efc_dropShadow_elmsAppend.forEach(function (elm) { defs.removeChild(elm); });
           props.efc_dropShadow_elmFilter = props.efc_dropShadow_elmOffset = props.efc_dropShadow_elmBlur =
             props.efc_dropShadow_styleFlood = props.efc_dropShadow_elmsAppend = null;
         }
@@ -3039,7 +3050,7 @@
         traceLog.add('</EFFECTS.dropShadow.remove>'); // [DEBUG/]
       },
 
-      update: function(props) {
+      update: function (props) {
         traceLog.add('<EFFECTS.dropShadow.update>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats,
           effectOptions = aplStats.dropShadow_options,
@@ -3078,7 +3089,7 @@
         traceLog.add('</EFFECTS.dropShadow.update>'); // [DEBUG/]
       },
 
-      adjustEdge: function(props, edge) {
+      adjustEdge: function (props, edge) {
         traceLog.add('<EFFECTS.dropShadow.adjustEdge>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats, margin, shadowEdge;
         if (curStats.dropShadow_dx != null) {
@@ -3095,7 +3106,7 @@
           if (shadowEdge.y2 > edge.y2) { edge.y2 = shadowEdge.y2; }
 
           // position filter
-          ['x', 'y'].forEach(function(boxKey) {
+          ['x', 'y'].forEach(function (boxKey) {
             var statKey = 'dropShadow_' + boxKey, value;
             curStats[statKey] = value = edge[boxKey + '1'];
             if (setStat(props, aplStats, statKey, value)) {
@@ -3109,10 +3120,10 @@
   };
   window.EFFECTS = EFFECTS; // [DEBUG/]
 
-  Object.keys(EFFECTS).forEach(function(effectName) {
+  Object.keys(EFFECTS).forEach(function (effectName) {
     var effectConf = EFFECTS[effectName], effectStats = effectConf.stats;
-    effectStats[effectName + '_enabled'] = {iniValue: false};
-    effectStats[effectName + '_options'] = {hasProps: true};
+    effectStats[effectName + '_enabled'] = { iniValue: false };
+    effectStats[effectName + '_options'] = { hasProps: true };
     if (effectConf.anim) {
       effectStats[effectName + '_animOptions'] = {};
       effectStats[effectName + '_animId'] = {};
@@ -3133,7 +3144,7 @@
     none: {
       defaultAnimOptions: {},
 
-      init: function(props, timeRatio) {
+      init: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.none.init>'); // [DEBUG/]
         var curStats = props.curStats;
         if (curStats.show_animId) {
@@ -3144,7 +3155,7 @@
         traceLog.add('</SHOW_EFFECTS.none.init>'); // [DEBUG/]
       },
 
-      start: function(props, timeRatio) {
+      start: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.none.start>'); // [DEBUG/]
         // [DEBUG]
         traceLog.add('timeRatio=' + (timeRatio != null ? 'timeRatio' : 'NONE'));
@@ -3153,7 +3164,7 @@
         traceLog.add('</SHOW_EFFECTS.none.start>'); // [DEBUG/]
       },
 
-      stop: function(props, finish, on) {
+      stop: function (props, finish, on) {
         traceLog.add('<SHOW_EFFECTS.none.stop>'); // [DEBUG/]
         traceLog.add('finish=' + finish); // [DEBUG/]
         // [DEBUG]
@@ -3170,15 +3181,15 @@
     },
 
     fade: {
-      defaultAnimOptions: {duration: 300, timing: 'linear'},
+      defaultAnimOptions: { duration: 300, timing: 'linear' },
 
-      init: function(props, timeRatio) {
+      init: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.fade.init>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats;
         if (curStats.show_animId) { anim.remove(curStats.show_animId); }
         curStats.show_animId = anim.add(
-          function(outputRatio) { return outputRatio; },
-          function(value, finish) {
+          function (outputRatio) { return outputRatio; },
+          function (value, finish) {
             if (finish) {
               SHOW_EFFECTS.fade.stop(props, true);
             } else {
@@ -3192,7 +3203,7 @@
         traceLog.add('</SHOW_EFFECTS.fade.init>'); // [DEBUG/]
       },
 
-      start: function(props, timeRatio) {
+      start: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.fade.start>'); // [DEBUG/]
         var curStats = props.curStats, prevTimeRatio;
         if (curStats.show_inAnim) {
@@ -3209,7 +3220,7 @@
         traceLog.add('</SHOW_EFFECTS.fade.start>'); // [DEBUG/]
       },
 
-      stop: function(props, finish, on) {
+      stop: function (props, finish, on) {
         traceLog.add('<SHOW_EFFECTS.fade.stop>'); // [DEBUG/]
         traceLog.add('finish=' + finish); // [DEBUG/]
         // [DEBUG]
@@ -3230,9 +3241,9 @@
     },
 
     draw: {
-      defaultAnimOptions: {duration: 500, timing: [0.58, 0, 0.42, 1]},
+      defaultAnimOptions: { duration: 500, timing: [0.58, 0, 0.42, 1] },
 
-      init: function(props, timeRatio) {
+      init: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.draw.init>'); // [DEBUG/]
         var curStats = props.curStats, aplStats = props.aplStats,
           pathList = props.pathList.baseVal,
@@ -3240,7 +3251,7 @@
         if (curStats.show_animId) { anim.remove(curStats.show_animId); }
 
         curStats.show_animId = anim.add(
-          function(outputRatio) {
+          function (outputRatio) {
             var pathLen, i = -1, newPathList, points, point;
 
             if (outputRatio === 0) {
@@ -3272,12 +3283,12 @@
             }
             return newPathList;
           },
-          function(value, finish) {
+          function (value, finish) {
             if (finish) {
               SHOW_EFFECTS.draw.stop(props, true);
             } else {
               props.pathList.animVal = value;
-              update(props, {path: true});
+              update(props, { path: true });
             }
           },
           aplStats.show_animOptions.duration, 1, aplStats.show_animOptions.timing, null, false);
@@ -3285,7 +3296,7 @@
         traceLog.add('</SHOW_EFFECTS.draw.init>'); // [DEBUG/]
       },
 
-      start: function(props, timeRatio) {
+      start: function (props, timeRatio) {
         traceLog.add('<SHOW_EFFECTS.draw.start>'); // [DEBUG/]
         var curStats = props.curStats, prevTimeRatio;
         if (curStats.show_inAnim) {
@@ -3303,7 +3314,7 @@
         traceLog.add('</SHOW_EFFECTS.draw.start>'); // [DEBUG/]
       },
 
-      stop: function(props, finish, on) {
+      stop: function (props, finish, on) {
         traceLog.add('<SHOW_EFFECTS.draw.stop>'); // [DEBUG/]
         traceLog.add('finish=' + finish); // [DEBUG/]
         // [DEBUG]
@@ -3317,13 +3328,13 @@
         if (finish) {
           if (on) {
             props.pathList.animVal = null;
-            update(props, {path: true});
+            update(props, { path: true });
           } else {
             // This path might show incorrect angle of plug because it can't get the angle.
             // But this is hidden. This path is for updatePath.
             props.pathList.animVal =
               [[props.pathList.baseVal[0][0], props.pathList.baseVal[0][0]]]; // line from start to start
-            update(props, {path: true});
+            update(props, { path: true });
           }
           svgShow(props, on);
         }
@@ -3331,7 +3342,7 @@
         return timeRatio;
       },
 
-      update: function(props) {
+      update: function (props) {
         removeEventHandler(props, 'apl_position', SHOW_EFFECTS.draw.update);
         if (props.curStats.show_inAnim) {
           SHOW_EFFECTS.draw.init(props, SHOW_EFFECTS.draw.stop(props)); // reset
@@ -3352,15 +3363,17 @@
   function LeaderLine(start, end, options) {
     var props = {
       // Initialize properties as array.
-      options: {anchorSE: [], socketSE: [], socketGravitySE: [], plugSE: [], plugColorSE: [], plugSizeSE: [],
-        plugOutlineEnabledSE: [], plugOutlineColorSE: [], plugOutlineSizeSE: [], labelSEM: ['', '', '']},
-      optionIsAttach: {anchorSE: [false, false], labelSEM: [false, false, false]},
+      options: {
+        anchorSE: [], socketSE: [], socketGravitySE: [], plugSE: [], plugColorSE: [], plugSizeSE: [],
+        plugOutlineEnabledSE: [], plugOutlineColorSE: [], plugOutlineSizeSE: [], labelSEM: ['', '', '']
+      },
+      optionIsAttach: { anchorSE: [false, false], labelSEM: [false, false, false] },
       curStats: {}, aplStats: {}, attachments: [], events: {}, reflowTargets: []
     };
 
     initStats(props.curStats, STATS);
     initStats(props.aplStats, STATS);
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var effectStats = EFFECTS[effectName].stats;
       initStats(props.curStats, effectStats);
       initStats(props.aplStats, effectStats);
@@ -3371,7 +3384,7 @@
     props.curStats.show_effect = DEFAULT_SHOW_EFFECT;
     props.curStats.show_animOptions = copyTree(SHOW_EFFECTS[DEFAULT_SHOW_EFFECT].defaultAnimOptions);
 
-    Object.defineProperty(this, '_id', {value: ++insId});
+    Object.defineProperty(this, '_id', { value: ++insId });
     props._id = this._id;
     insProps[this._id] = props;
 
@@ -3389,9 +3402,9 @@
     this.setOptions(options);
   }
 
-  (function() {
+  (function () {
     function createSetter(propName) {
-      return function(value) {
+      return function (value) {
         var options = {};
         options[propName] = value;
         this.setOptions(options); // eslint-disable-line no-invalid-this
@@ -3400,22 +3413,22 @@
 
     // Setup option accessor methods (direct)
     [['start', 'anchorSE', 0], ['end', 'anchorSE', 1], ['color', 'lineColor'], ['size', 'lineSize'],
-        ['startSocketGravity', 'socketGravitySE', 0], ['endSocketGravity', 'socketGravitySE', 1],
-        ['startPlugColor', 'plugColorSE', 0], ['endPlugColor', 'plugColorSE', 1],
-        ['startPlugSize', 'plugSizeSE', 0], ['endPlugSize', 'plugSizeSE', 1],
-        ['outline', 'lineOutlineEnabled'],
-          ['outlineColor', 'lineOutlineColor'], ['outlineSize', 'lineOutlineSize'],
-        ['startPlugOutline', 'plugOutlineEnabledSE', 0], ['endPlugOutline', 'plugOutlineEnabledSE', 1],
-          ['startPlugOutlineColor', 'plugOutlineColorSE', 0], ['endPlugOutlineColor', 'plugOutlineColorSE', 1],
-          ['startPlugOutlineSize', 'plugOutlineSizeSE', 0], ['endPlugOutlineSize', 'plugOutlineSizeSE', 1]]
-      .forEach(function(conf) {
+    ['startSocketGravity', 'socketGravitySE', 0], ['endSocketGravity', 'socketGravitySE', 1],
+    ['startPlugColor', 'plugColorSE', 0], ['endPlugColor', 'plugColorSE', 1],
+    ['startPlugSize', 'plugSizeSE', 0], ['endPlugSize', 'plugSizeSE', 1],
+    ['outline', 'lineOutlineEnabled'],
+    ['outlineColor', 'lineOutlineColor'], ['outlineSize', 'lineOutlineSize'],
+    ['startPlugOutline', 'plugOutlineEnabledSE', 0], ['endPlugOutline', 'plugOutlineEnabledSE', 1],
+    ['startPlugOutlineColor', 'plugOutlineColorSE', 0], ['endPlugOutlineColor', 'plugOutlineColorSE', 1],
+    ['startPlugOutlineSize', 'plugOutlineSizeSE', 0], ['endPlugOutlineSize', 'plugOutlineSizeSE', 1]]
+      .forEach(function (conf) {
         var propName = conf[0], optionName = conf[1], i = conf[2];
         Object.defineProperty(LeaderLine.prototype, propName, {
-          get: function() {
+          get: function () {
             var value = // Don't use closure.
               i != null ? insProps[this._id].options[optionName][i] :
-              optionName ? insProps[this._id].options[optionName] :
-              insProps[this._id].options[propName];
+                optionName ? insProps[this._id].options[optionName] :
+                  insProps[this._id].options[propName];
             return value == null ? KEYWORD_AUTO : copyTree(value);
           },
           set: createSetter(propName),
@@ -3424,19 +3437,19 @@
       });
     // Setup option accessor methods (key-to-id)
     [['path', PATH_KEY_2_ID],
-        ['startSocket', SOCKET_KEY_2_ID, 'socketSE', 0], ['endSocket', SOCKET_KEY_2_ID, 'socketSE', 1],
-        ['startPlug', PLUG_KEY_2_ID, 'plugSE', 0], ['endPlug', PLUG_KEY_2_ID, 'plugSE', 1]]
-      .forEach(function(conf) {
+    ['startSocket', SOCKET_KEY_2_ID, 'socketSE', 0], ['endSocket', SOCKET_KEY_2_ID, 'socketSE', 1],
+    ['startPlug', PLUG_KEY_2_ID, 'plugSE', 0], ['endPlug', PLUG_KEY_2_ID, 'plugSE', 1]]
+      .forEach(function (conf) {
         var propName = conf[0], key2Id = conf[1], optionName = conf[2], i = conf[3];
         Object.defineProperty(LeaderLine.prototype, propName, {
-          get: function() {
+          get: function () {
             var value = // Don't use closure.
-                i != null ? insProps[this._id].options[optionName][i] :
+              i != null ? insProps[this._id].options[optionName][i] :
                 optionName ? insProps[this._id].options[optionName] :
-                insProps[this._id].options[propName],
+                  insProps[this._id].options[propName],
               key;
             return !value ? KEYWORD_AUTO :
-              Object.keys(key2Id).some(function(optKey) {
+              Object.keys(key2Id).some(function (optKey) {
                 if (key2Id[optKey] === value) { key = optKey; return true; }
                 return false;
               }) ? key : new Error('It\'s broken');
@@ -3446,25 +3459,25 @@
         });
       });
     // Setup option accessor methods (effect)
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var effectConf = EFFECTS[effectName];
 
       function getOptions(optionValue) {
-        var effectOptions = effectConf.optionsConf.reduce(function(effectOptions, optionConf) {
+        var effectOptions = effectConf.optionsConf.reduce(function (effectOptions, optionConf) {
           var optionClass = optionConf[0], propName = optionConf[1], key2Id = optionConf[2],
             optionName = optionConf[3], i = optionConf[4],
             value =
               i != null ? optionValue[optionName][i] :
-              optionName ? optionValue[optionName] :
-              optionValue[propName],
+                optionName ? optionValue[optionName] :
+                  optionValue[propName],
             key;
           effectOptions[propName] = optionClass === 'id' ? (
-              !value ? KEYWORD_AUTO :
-              Object.keys(key2Id).some(function(optKey) {
+            !value ? KEYWORD_AUTO :
+              Object.keys(key2Id).some(function (optKey) {
                 if (key2Id[optKey] === value) { key = optKey; return true; }
                 return false;
               }) ? key : new Error('It\'s broken')
-            ) : (value == null ? KEYWORD_AUTO : copyTree(value));
+          ) : (value == null ? KEYWORD_AUTO : copyTree(value));
           return effectOptions;
         }, {});
         if (effectConf.anim) {
@@ -3474,7 +3487,7 @@
       }
 
       Object.defineProperty(LeaderLine.prototype, effectName, {
-        get: function() {
+        get: function () {
           var value = insProps[this._id].options[effectName];
           return isObject(value) ? getOptions(value) : value;
         },
@@ -3483,9 +3496,9 @@
       });
     });
     // Setup option accessor methods (label)
-    ['startLabel', 'endLabel', 'middleLabel'].forEach(function(propName, i) {
+    ['startLabel', 'endLabel', 'middleLabel'].forEach(function (propName, i) {
       Object.defineProperty(LeaderLine.prototype, propName, {
-        get: function() {
+        get: function () {
           var props = insProps[this._id], options = props.options; // Don't use closure.
           return options.labelSEM[i] && !props.optionIsAttach.labelSEM[i] ?
             insAttachProps[options.labelSEM[i]._id].text : options.labelSEM[i] || '';
@@ -3496,25 +3509,25 @@
     });
   })();
 
-  LeaderLine.prototype.setOptions = function(newOptions) {
+  LeaderLine.prototype.setOptions = function (newOptions) {
     setOptions(insProps[this._id], newOptions);
     return this;
   };
 
-  LeaderLine.prototype.position = function() {
-    update(insProps[this._id], {position: true});
+  LeaderLine.prototype.position = function () {
+    update(insProps[this._id], { position: true });
     return this;
   };
 
-  LeaderLine.prototype.remove = function() {
+  LeaderLine.prototype.remove = function () {
     var props = insProps[this._id], curStats = props.curStats;
 
-    Object.keys(EFFECTS).forEach(function(effectName) {
+    Object.keys(EFFECTS).forEach(function (effectName) {
       var keyAnimId = effectName + '_animId';
       if (curStats[keyAnimId]) { anim.remove(curStats[keyAnimId]); }
     });
     if (curStats.show_animId) { anim.remove(curStats.show_animId); }
-    props.attachments.slice().forEach(function(attachProps) { unbindAttachment(props, attachProps); });
+    props.attachments.slice().forEach(function (attachProps) { unbindAttachment(props, attachProps); });
 
     if (props.baseWindow && props.svg) {
       props.baseWindow.document.body.removeChild(props.svg);
@@ -3522,12 +3535,12 @@
     delete insProps[this._id];
   };
 
-  LeaderLine.prototype.show = function(showEffectName, animOptions) {
+  LeaderLine.prototype.show = function (showEffectName, animOptions) {
     show(insProps[this._id], true, showEffectName, animOptions);
     return this;
   };
 
-  LeaderLine.prototype.hide = function(showEffectName, animOptions) {
+  LeaderLine.prototype.hide = function (showEffectName, animOptions) {
     show(insProps[this._id], false, showEffectName, animOptions);
     return this;
   };
@@ -3536,11 +3549,11 @@
    * @param {attachProps} attachProps - `attachProps` of `LeaderLineAttachment` instance.
    * @returns {void}
    */
-  removeAttachment = function(attachProps) {
+  removeAttachment = function (attachProps) {
     traceLog.add('<removeAttachment>'); // [DEBUG/]
     if (attachProps && insAttachProps[attachProps._id]) {
       attachProps.boundTargets.slice().forEach(
-        function(boundTarget) { unbindAttachment(boundTarget.props, attachProps, true); });
+        function (boundTarget) { unbindAttachment(boundTarget.props, attachProps, true); });
       if (attachProps.conf.remove) { attachProps.conf.remove(attachProps); }
       delete insAttachProps[attachProps._id];
     } else { // [DEBUG/]
@@ -3549,22 +3562,22 @@
     traceLog.add('</removeAttachment>'); // [DEBUG/]
   };
 
-  LeaderLineAttachment = (function() {
+  LeaderLineAttachment = (function () {
     /**
      * @class
      * @param {AttachConf} conf - Target AttachConf.
      * @param {Array} args - Initial options.
      */
     function LeaderLineAttachment(conf, args) {
-      var attachProps = {conf: conf, curStats: {}, aplStats: {}, boundTargets: []},
+      var attachProps = { conf: conf, curStats: {}, aplStats: {}, boundTargets: [] },
         attachOptions, shortOptions = {};
 
       // Parse arguments
-      conf.argOptions.every(function(argOption) {
+      conf.argOptions.every(function (argOption) {
         if (args.length && (
-              typeof argOption.type === 'string' ? typeof args[0] === argOption.type :
-              typeof argOption.type === 'function' ? argOption.type(args[0]) : false
-            )) {
+          typeof argOption.type === 'string' ? typeof args[0] === argOption.type :
+            typeof argOption.type === 'function' ? argOption.type(args[0]) : false
+        )) {
           shortOptions[argOption.optionName] = args.shift();
           return true;
         } else {
@@ -3573,16 +3586,16 @@
       });
       attachOptions = args.length && isObject(args[0]) ? copyTree(args[0]) : {};
       Object.keys(shortOptions).forEach(
-        function(optionName) { attachOptions[optionName] = shortOptions[optionName]; });
+        function (optionName) { attachOptions[optionName] = shortOptions[optionName]; });
 
       if (conf.stats) {
         initStats(attachProps.curStats, conf.stats);
         initStats(attachProps.aplStats, conf.stats);
       }
 
-      Object.defineProperty(this, '_id', {value: ++insAttachId});
+      Object.defineProperty(this, '_id', { value: ++insAttachId });
       Object.defineProperty(this, 'isRemoved', {
-        get: function() { return !insAttachProps[this._id]; }
+        get: function () { return !insAttachProps[this._id]; }
       });
       attachProps._id = this._id;
 
@@ -3592,14 +3605,14 @@
       }
     }
 
-    LeaderLineAttachment.prototype.remove = function() {
+    LeaderLineAttachment.prototype.remove = function () {
       traceLog.add('<LeaderLineAttachment.remove>'); // [DEBUG/]
       var that = this, attachProps = insAttachProps[that._id];
       if (attachProps) {
         attachProps.boundTargets.slice().forEach( // Copy boundTargets because removeOption may change array.
-          function(boundTarget) { attachProps.conf.removeOption(attachProps, boundTarget); });
+          function (boundTarget) { attachProps.conf.removeOption(attachProps, boundTarget); });
 
-        addDelayedProc(function() {
+        addDelayedProc(function () {
           var attachProps = insAttachProps[that._id];
           traceLog.add('<LeaderLineAttachment.remove.delayedProc>'); // [DEBUG/]
           if (attachProps) { // it should be removed by unbinding all
@@ -3622,7 +3635,7 @@
    * @param {string} [type] - A required type of LeaderLineAttachment.
    * @returns {(boolean|null)} true: Enabled LeaderLineAttachment, false: Not instance, null: Disabled it
    */
-  isAttachment = function(obj, type) {
+  isAttachment = function (obj, type) {
     return !(obj instanceof LeaderLineAttachment) ? false :
       !obj.isRemoved && (!type || insAttachProps[obj._id].conf.type === type) ? true : null;
   };
@@ -3647,10 +3660,10 @@
   ATTACHMENTS = {
     pointAnchor: {
       type: 'anchor',
-      argOptions: [{optionName: 'element', type: isElement}],
+      argOptions: [{ optionName: 'element', type: isElement }],
 
       // attachOptions: element, x, y
-      init: function(attachProps, attachOptions) {
+      init: function (attachProps, attachOptions) {
         traceLog.add('<ATTACHMENTS.pointAnchor.init>'); // [DEBUG/]
         attachProps.element = ATTACHMENTS.pointAnchor.checkElement(attachOptions.element);
         attachProps.x = ATTACHMENTS.pointAnchor.parsePercent(attachOptions.x, true) || [0.5, true];
@@ -3659,7 +3672,7 @@
         return true;
       },
 
-      removeOption: function(attachProps, boundTarget) {
+      removeOption: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.pointAnchor.removeOption>'); // [DEBUG/]
         traceLog.add('optionName=%s', boundTarget.optionName); // [DEBUG/]
         var props = boundTarget.props, newOptions = {}, element = attachProps.element,
@@ -3673,7 +3686,7 @@
         traceLog.add('</ATTACHMENTS.pointAnchor.removeOption>'); // [DEBUG/]
       },
 
-      getBBoxNest: function(attachProps, props) {
+      getBBoxNest: function (attachProps, props) {
         var bBox = getBBoxNest(attachProps.element, props.baseWindow),
           width = bBox.width, height = bBox.height;
         bBox.width = bBox.height = 0;
@@ -3682,7 +3695,7 @@
         return bBox;
       },
 
-      parsePercent: function(value, allowNegative) {
+      parsePercent: function (value, allowNegative) {
         var matches, num, ratio = false;
         if (isFinite(value)) {
           num = value;
@@ -3693,7 +3706,7 @@
         return num != null && (allowNegative || num >= 0) ? [num, ratio] : null;
       },
 
-      checkElement: function(element) {
+      checkElement: function (element) {
         if (element == null) {
           element = document.body;
         } else if (!isElement(element)) {
@@ -3705,12 +3718,14 @@
 
     areaAnchor: {
       type: 'anchor',
-      argOptions: [{optionName: 'element', type: isElement}, {optionName: 'shape', type: 'string'}],
-      stats: {color: {}, strokeWidth: {}, elementWidth: {}, elementHeight: {}, elementLeft: {}, elementTop: {},
-        pathListRel: {}, bBoxRel: {}, pathData: {}, viewBoxBBox: {hasProps: true}, dashLen: {}, dashGap: {}},
+      argOptions: [{ optionName: 'element', type: isElement }, { optionName: 'shape', type: 'string' }],
+      stats: {
+        color: {}, strokeWidth: {}, elementWidth: {}, elementHeight: {}, elementLeft: {}, elementTop: {},
+        pathListRel: {}, bBoxRel: {}, pathData: {}, viewBoxBBox: { hasProps: true }, dashLen: {}, dashGap: {}
+      },
 
       // attachOptions: element, color(A), fillColor, size(A), dash, shape, x, y, width, height, radius, points
-      init: function(attachProps, attachOptions) {
+      init: function (attachProps, attachOptions) {
         traceLog.add('<ATTACHMENTS.areaAnchor.init>'); // [DEBUG/]
         var points = [], baseDocument, svg, window;
         attachProps.element = ATTACHMENTS.pointAnchor.checkElement(attachOptions.element);
@@ -3736,17 +3751,17 @@
         if (attachOptions.shape === 'circle') {
           attachProps.shape = attachOptions.shape;
         } else if (attachOptions.shape === 'polygon' &&
-            Array.isArray(attachOptions.points) && attachOptions.points.length >= 3 &&
-            attachOptions.points.every(function(point) {
-              var validPoint = {};
-              if ((validPoint.x = ATTACHMENTS.pointAnchor.parsePercent(point[0], true)) &&
-                  (validPoint.y = ATTACHMENTS.pointAnchor.parsePercent(point[1], true))) {
-                points.push(validPoint);
-                if (validPoint.x[1] || validPoint.y[1]) { attachProps.hasRatio = true; }
-                return true;
-              }
-              return false;
-            })) {
+          Array.isArray(attachOptions.points) && attachOptions.points.length >= 3 &&
+          attachOptions.points.every(function (point) {
+            var validPoint = {};
+            if ((validPoint.x = ATTACHMENTS.pointAnchor.parsePercent(point[0], true)) &&
+              (validPoint.y = ATTACHMENTS.pointAnchor.parsePercent(point[1], true))) {
+              points.push(validPoint);
+              if (validPoint.x[1] || validPoint.y[1]) { attachProps.hasRatio = true; }
+              return true;
+            }
+            return false;
+          })) {
           attachProps.shape = attachOptions.shape;
           attachProps.points = points;
         } else {
@@ -3778,7 +3793,7 @@
         attachProps.bodyOffset = getBodyOffset(window); // Get `bodyOffset`
 
         // event handler for this instance
-        attachProps.updateColor = function() {
+        attachProps.updateColor = function () {
           traceLog.add('<ATTACHMENTS.areaAnchor.updateColor>'); // [DEBUG/]
           var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
             llStats = attachProps.boundTargets.length ? attachProps.boundTargets[0].props.curStats : null,
@@ -3791,9 +3806,9 @@
           traceLog.add('</ATTACHMENTS.areaAnchor.updateColor>'); // [DEBUG/]
         };
 
-        attachProps.updateShow = function() {
+        attachProps.updateShow = function () {
           svgShow(attachProps, attachProps.boundTargets.some(
-            function(boundTarget) { return boundTarget.props.isShown === true; }));
+            function (boundTarget) { return boundTarget.props.isShown === true; }));
         };
         // event handler to update `strokeWidth` is unnecessary
         // because `getStrokeWidth` is triggered by `updateLine` and `updatePosition`
@@ -3802,12 +3817,12 @@
         return true;
       },
 
-      bind: function(attachProps, bindTarget) {
+      bind: function (attachProps, bindTarget) {
         traceLog.add('<ATTACHMENTS.areaAnchor.bind>'); // [DEBUG/]
         var props = bindTarget.props;
         if (!attachProps.color) { addEventHandler(props, 'cur_line_color', attachProps.updateColor); }
         addEventHandler(props, 'svgShow', attachProps.updateShow);
-        addDelayedProc(function() { // after updating `attachProps.boundTargets`
+        addDelayedProc(function () { // after updating `attachProps.boundTargets`
           attachProps.updateColor();
           attachProps.updateShow();
         });
@@ -3815,21 +3830,21 @@
         return true;
       },
 
-      unbind: function(attachProps, boundTarget) {
+      unbind: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.areaAnchor.unbind>'); // [DEBUG/]
         var props = boundTarget.props;
         if (!attachProps.color) { removeEventHandler(props, 'cur_line_color', attachProps.updateColor); }
         removeEventHandler(props, 'svgShow', attachProps.updateShow);
 
         if (attachProps.boundTargets.length > 1) { // It's not removed yet.
-          addDelayedProc(function() { // after updating `attachProps.boundTargets`
+          addDelayedProc(function () { // after updating `attachProps.boundTargets`
             traceLog.add('<ATTACHMENTS.areaAnchor.unbind.delayedProc>'); // [DEBUG/]
             attachProps.updateColor();
             attachProps.updateShow();
             if (ATTACHMENTS.areaAnchor.update(attachProps)) { // it's not called by unbound ll
               traceLog.add('update-boundTargets'); // [DEBUG/]
-              attachProps.boundTargets.forEach(function(boundTarget) { // Update other instances.
-                update(boundTarget.props, {position: true});
+              attachProps.boundTargets.forEach(function (boundTarget) { // Update other instances.
+                update(boundTarget.props, { position: true });
               });
             }
             traceLog.add('</ATTACHMENTS.areaAnchor.unbind.delayedProc>'); // [DEBUG/]
@@ -3838,29 +3853,29 @@
         traceLog.add('</ATTACHMENTS.areaAnchor.unbind>'); // [DEBUG/]
       },
 
-      removeOption: function(attachProps, boundTarget) {
+      removeOption: function (attachProps, boundTarget) {
         ATTACHMENTS.pointAnchor.removeOption(attachProps, boundTarget);
       },
 
-      remove: function(attachProps) {
+      remove: function (attachProps) {
         traceLog.add('<ATTACHMENTS.areaAnchor.remove>'); // [DEBUG/]
         if (attachProps.boundTargets.length) { // it should be unbound by LeaderLineAttachment.remove
           traceLog.add('error-not-unbound'); // [DEBUG/]
           console.error('LeaderLineAttachment was not unbound by remove');
           attachProps.boundTargets.forEach(
-            function(boundTarget) { ATTACHMENTS.areaAnchor.unbind(attachProps, boundTarget); });
+            function (boundTarget) { ATTACHMENTS.areaAnchor.unbind(attachProps, boundTarget); });
         }
         attachProps.svg.parentNode.removeChild(attachProps.svg);
         traceLog.add('</ATTACHMENTS.areaAnchor.remove>'); // [DEBUG/]
       },
 
-      getStrokeWidth: function(attachProps, props) {
+      getStrokeWidth: function (attachProps, props) {
         traceLog.add('<ATTACHMENTS.areaAnchor.getStrokeWidth>'); // [DEBUG/]
         if (ATTACHMENTS.areaAnchor.update(attachProps) && attachProps.boundTargets.length > 1) {
           traceLog.add('update-boundTargets'); // [DEBUG/]
-          addDelayedProc(function() {
-            attachProps.boundTargets.forEach(function(boundTarget) { // Update other instances.
-              if (boundTarget.props !== props) { update(boundTarget.props, {position: true}); }
+          addDelayedProc(function () {
+            attachProps.boundTargets.forEach(function (boundTarget) { // Update other instances.
+              if (boundTarget.props !== props) { update(boundTarget.props, { position: true }); }
             });
           });
         }
@@ -3868,15 +3883,15 @@
         return attachProps.curStats.strokeWidth;
       },
 
-      getPathData: function(attachProps, props) {
+      getPathData: function (attachProps, props) {
         var bBox = getBBoxNest(attachProps.element, props.baseWindow);
-        return pathList2PathData(attachProps.curStats.pathListRel, function(point) {
+        return pathList2PathData(attachProps.curStats.pathListRel, function (point) {
           point.x += bBox.left;
           point.y += bBox.top;
         });
       },
 
-      getBBoxNest: function(attachProps, props) {
+      getBBoxNest: function (attachProps, props) {
         var bBox = getBBoxNest(attachProps.element, props.baseWindow),
           bBoxRel = attachProps.curStats.bBoxRel;
         return {
@@ -3889,7 +3904,7 @@
         };
       },
 
-      update: function(attachProps) {
+      update: function (attachProps) {
         traceLog.add('<ATTACHMENTS.areaAnchor.update>'); // [DEBUG/]
         var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
           llStats = attachProps.boundTargets.length ? attachProps.boundTargets[0].props.curStats : null,
@@ -3906,12 +3921,12 @@
         updated.elementTop = setStat(attachProps, curStats, 'elementTop', elementBBox.top);
 
         if (updated.strokeWidth ||
-            attachProps.hasRatio && (updated.elementWidth || updated.elementHeight)) { // generate path
+          attachProps.hasRatio && (updated.elementWidth || updated.elementHeight)) { // generate path
           traceLog.add('generate-path'); // [DEBUG/]
           switch (attachProps.shape) {
 
             case 'rect':
-              (function() {
+              (function () {
                 var areaBBox, radius, maxRadius, side, strokePadding, offsetC, padding, points, cpR;
                 areaBBox = {
                   left: attachProps.x[0] * (attachProps.x[1] ? elementBBox.width : 1),
@@ -3933,32 +3948,32 @@
                   cpR = radius * CIRCLE_CP;
 
                   points = [
-                    {x: areaBBox.left - padding, y: areaBBox.top + offsetC}, // 0 left-top-start
-                    {x: areaBBox.left + offsetC, y: areaBBox.top - padding}, // 1 left-top-end
-                    {x: areaBBox.right - offsetC, y: areaBBox.top - padding}, // 2 right-top-start
-                    {x: areaBBox.right + padding, y: areaBBox.top + offsetC}, // 3 right-top-end
-                    {x: areaBBox.right + padding, y: areaBBox.bottom - offsetC}, // 4 right-bottom-start
-                    {x: areaBBox.right - offsetC, y: areaBBox.bottom + padding}, // 5 right-bottom-end
-                    {x: areaBBox.left + offsetC, y: areaBBox.bottom + padding}, // 6 left-bottom-start
-                    {x: areaBBox.left - padding, y: areaBBox.bottom - offsetC} // 7 left-bottom-end
+                    { x: areaBBox.left - padding, y: areaBBox.top + offsetC }, // 0 left-top-start
+                    { x: areaBBox.left + offsetC, y: areaBBox.top - padding }, // 1 left-top-end
+                    { x: areaBBox.right - offsetC, y: areaBBox.top - padding }, // 2 right-top-start
+                    { x: areaBBox.right + padding, y: areaBBox.top + offsetC }, // 3 right-top-end
+                    { x: areaBBox.right + padding, y: areaBBox.bottom - offsetC }, // 4 right-bottom-start
+                    { x: areaBBox.right - offsetC, y: areaBBox.bottom + padding }, // 5 right-bottom-end
+                    { x: areaBBox.left + offsetC, y: areaBBox.bottom + padding }, // 6 left-bottom-start
+                    { x: areaBBox.left - padding, y: areaBBox.bottom - offsetC } // 7 left-bottom-end
                   ];
-                  curStats.pathListRel = [[points[0], {x: points[0].x, y: points[0].y - cpR},
-                    {x: points[1].x - cpR, y: points[1].y}, points[1]]];
+                  curStats.pathListRel = [[points[0], { x: points[0].x, y: points[0].y - cpR },
+                  { x: points[1].x - cpR, y: points[1].y }, points[1]]];
                   if (points[1].x !== points[2].x) { curStats.pathListRel.push([points[1], points[2]]); }
-                  curStats.pathListRel.push([points[2], {x: points[2].x + cpR, y: points[2].y},
-                    {x: points[3].x, y: points[3].y - cpR}, points[3]]);
+                  curStats.pathListRel.push([points[2], { x: points[2].x + cpR, y: points[2].y },
+                  { x: points[3].x, y: points[3].y - cpR }, points[3]]);
                   if (points[3].y !== points[4].y) { curStats.pathListRel.push([points[3], points[4]]); }
-                  curStats.pathListRel.push([points[4], {x: points[4].x, y: points[4].y + cpR},
-                    {x: points[5].x + cpR, y: points[5].y}, points[5]]);
+                  curStats.pathListRel.push([points[4], { x: points[4].x, y: points[4].y + cpR },
+                  { x: points[5].x + cpR, y: points[5].y }, points[5]]);
                   if (points[5].x !== points[6].x) { curStats.pathListRel.push([points[5], points[6]]); }
-                  curStats.pathListRel.push([points[6], {x: points[6].x - cpR, y: points[6].y},
-                    {x: points[7].x, y: points[7].y + cpR}, points[7]]);
+                  curStats.pathListRel.push([points[6], { x: points[6].x - cpR, y: points[6].y },
+                  { x: points[7].x, y: points[7].y + cpR }, points[7]]);
                   if (points[7].y !== points[0].y) { curStats.pathListRel.push([points[7], points[0]]); }
                   curStats.pathListRel.push([]);
 
                   padding = radius - offsetC + curStats.strokeWidth / 2;
-                  points = [{x: areaBBox.left - padding, y: areaBBox.top - padding}, // left-top
-                    {x: areaBBox.right + padding, y: areaBBox.bottom + padding}]; // right-bottom
+                  points = [{ x: areaBBox.left - padding, y: areaBBox.top - padding }, // left-top
+                  { x: areaBBox.right + padding, y: areaBBox.bottom + padding }]; // right-bottom
                   curStats.bBoxRel = {
                     left: points[0].x, top: points[0].y, right: points[1].x, bottom: points[1].y,
                     width: points[1].x - points[0].x, height: points[1].y - points[0].y
@@ -3966,19 +3981,23 @@
 
                 } else {
                   padding = curStats.strokeWidth / 2;
-                  points = [{x: areaBBox.left - padding, y: areaBBox.top - padding}, // left-top
-                    {x: areaBBox.right + padding, y: areaBBox.bottom + padding}]; // right-bottom
+                  points = [{ x: areaBBox.left - padding, y: areaBBox.top - padding }, // left-top
+                  { x: areaBBox.right + padding, y: areaBBox.bottom + padding }]; // right-bottom
                   curStats.pathListRel = [
-                    [points[0], {x: points[1].x, y: points[0].y}],
-                    [{x: points[1].x, y: points[0].y}, points[1]],
-                    [points[1], {x: points[0].x, y: points[1].y}],
+                    [points[0], { x: points[1].x, y: points[0].y }],
+                    [{ x: points[1].x, y: points[0].y }, points[1]],
+                    [points[1], { x: points[0].x, y: points[1].y }],
                     []
                   ];
 
-                  points = [{x: areaBBox.left - curStats.strokeWidth,
-                      y: areaBBox.top - curStats.strokeWidth}, // left-top
-                    {x: areaBBox.right + curStats.strokeWidth,
-                      y: areaBBox.bottom + curStats.strokeWidth}]; // right-bottom
+                  points = [{
+                    x: areaBBox.left - curStats.strokeWidth,
+                    y: areaBBox.top - curStats.strokeWidth
+                  }, // left-top
+                  {
+                    x: areaBBox.right + curStats.strokeWidth,
+                    y: areaBBox.bottom + curStats.strokeWidth
+                  }]; // right-bottom
                   curStats.bBoxRel = {
                     left: points[0].x, top: points[0].y, right: points[1].x, bottom: points[1].y,
                     width: points[1].x - points[0].x, height: points[1].y - points[0].y
@@ -3988,7 +4007,7 @@
               break;
 
             case 'circle':
-              (function() {
+              (function () {
                 var areaBBox, cx, cy, radiusX, radiusY, cpRX, cpRY,
                   strokePadding, offsetCX, offsetCY, paddingX, paddingY, points;
                 areaBBox = {
@@ -4018,27 +4037,27 @@
                 cpRY = radiusY * CIRCLE_CP;
 
                 points = [
-                  {x: cx - radiusX, y: cy}, // 0 left
-                  {x: cx, y: cy - radiusY}, // 1 top
-                  {x: cx + radiusX, y: cy}, // 2 right
-                  {x: cx, y: cy + radiusY} // 3 bottom
+                  { x: cx - radiusX, y: cy }, // 0 left
+                  { x: cx, y: cy - radiusY }, // 1 top
+                  { x: cx + radiusX, y: cy }, // 2 right
+                  { x: cx, y: cy + radiusY } // 3 bottom
                 ];
                 curStats.pathListRel = [
-                  [points[0], {x: points[0].x, y: points[0].y - cpRY},
-                    {x: points[1].x - cpRX, y: points[1].y}, points[1]],
-                  [points[1], {x: points[1].x + cpRX, y: points[1].y},
-                    {x: points[2].x, y: points[2].y - cpRY}, points[2]],
-                  [points[2], {x: points[2].x, y: points[2].y + cpRY},
-                    {x: points[3].x + cpRX, y: points[3].y}, points[3]],
-                  [points[3], {x: points[3].x - cpRX, y: points[3].y},
-                    {x: points[0].x, y: points[0].y + cpRY}, points[0]],
+                  [points[0], { x: points[0].x, y: points[0].y - cpRY },
+                  { x: points[1].x - cpRX, y: points[1].y }, points[1]],
+                  [points[1], { x: points[1].x + cpRX, y: points[1].y },
+                  { x: points[2].x, y: points[2].y - cpRY }, points[2]],
+                  [points[2], { x: points[2].x, y: points[2].y + cpRY },
+                  { x: points[3].x + cpRX, y: points[3].y }, points[3]],
+                  [points[3], { x: points[3].x - cpRX, y: points[3].y },
+                  { x: points[0].x, y: points[0].y + cpRY }, points[0]],
                   []
                 ];
 
                 paddingX = radiusX - offsetCX + curStats.strokeWidth / 2;
                 paddingY = radiusY - offsetCY + curStats.strokeWidth / 2;
-                points = [{x: areaBBox.left - paddingX, y: areaBBox.top - paddingY}, // left-top
-                  {x: areaBBox.right + paddingX, y: areaBBox.bottom + paddingY}]; // right-bottom
+                points = [{ x: areaBBox.left - paddingX, y: areaBBox.top - paddingY }, // left-top
+                { x: areaBBox.right + paddingX, y: areaBBox.bottom + paddingY }]; // right-bottom
                 curStats.bBoxRel = {
                   left: points[0].x, top: points[0].y, right: points[1].x, bottom: points[1].y,
                   width: points[1].x - points[0].x, height: points[1].y - points[0].y
@@ -4047,9 +4066,9 @@
               break;
 
             case 'polygon':
-              (function() {
+              (function () {
                 var areaBBox, curPoint, padding, points;
-                attachProps.points.forEach(function(point) {
+                attachProps.points.forEach(function (point) {
                   var x = point.x[0] * (point.x[1] ? elementBBox.width : 1),
                     y = point.y[0] * (point.y[1] ? elementBBox.height : 1);
                   if (areaBBox) {
@@ -4058,21 +4077,21 @@
                     if (y < areaBBox.top) { areaBBox.top = y; }
                     if (y > areaBBox.bottom) { areaBBox.bottom = y; }
                   } else {
-                    areaBBox = {left: x, right: x, top: y, bottom: y};
+                    areaBBox = { left: x, right: x, top: y, bottom: y };
                   }
 
                   if (curPoint) {
-                    curStats.pathListRel.push([curPoint, {x: x, y: y}]);
+                    curStats.pathListRel.push([curPoint, { x: x, y: y }]);
                   } else {
                     curStats.pathListRel = [];
                   }
-                  curPoint = {x: x, y: y};
+                  curPoint = { x: x, y: y };
                 });
                 curStats.pathListRel.push([]);
 
                 padding = curStats.strokeWidth / 2;
-                points = [{x: areaBBox.left - padding, y: areaBBox.top - padding}, // left-top
-                  {x: areaBBox.right + padding, y: areaBBox.bottom + padding}]; // right-bottom
+                points = [{ x: areaBBox.left - padding, y: areaBBox.top - padding }, // left-top
+                { x: areaBBox.right + padding, y: areaBBox.bottom + padding }]; // right-bottom
                 curStats.bBoxRel = {
                   left: points[0].x, top: points[0].y, right: points[1].x, bottom: points[1].y,
                   width: points[1].x - points[0].x, height: points[1].y - points[0].y
@@ -4085,7 +4104,7 @@
           updated.pathListRel = updated.bBoxRel = true;
         }
         if (updated.pathListRel || updated.elementLeft || updated.elementTop) {
-          curStats.pathData = pathList2PathData(curStats.pathListRel, function(point) {
+          curStats.pathData = pathList2PathData(curStats.pathListRel, function (point) {
             point.x += elementBBox.left;
             point.y += elementBBox.top;
           });
@@ -4127,14 +4146,14 @@
         }
 
         // ViewBox
-        (function() {
+        (function () {
           var curVBBBox = curStats.viewBoxBBox, aplVBBBox = aplStats.viewBoxBBox,
             viewBox = attachProps.svg.viewBox.baseVal, styles = attachProps.svg.style;
           curVBBBox.x = curStats.bBoxRel.left + elementBBox.left;
           curVBBBox.y = curStats.bBoxRel.top + elementBBox.top;
           curVBBBox.width = curStats.bBoxRel.width;
           curVBBBox.height = curStats.bBoxRel.height;
-          ['x', 'y', 'width', 'height'].forEach(function(boxKey) {
+          ['x', 'y', 'width', 'height'].forEach(function (boxKey) {
             if ((value = curVBBBox[boxKey]) !== aplVBBBox[boxKey]) {
               traceLog.add(boxKey); // [DEBUG/]
               viewBox[boxKey] = aplVBBBox[boxKey] = value;
@@ -4152,7 +4171,7 @@
 
     mouseHoverAnchor: {
       type: 'anchor',
-      argOptions: [{optionName: 'element', type: isElement}, {optionName: 'showEffectName', type: 'string'}],
+      argOptions: [{ optionName: 'element', type: isElement }, { optionName: 'showEffectName', type: 'string' }],
 
       style: {
         backgroundImage: 'url(\'data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cG9seWdvbiBwb2ludHM9IjI0LDAgMCw4IDgsMTEgMCwxOSA1LDI0IDEzLDE2IDE2LDI0IiBmaWxsPSJjb3JhbCIvPjwvc3ZnPg==\')',
@@ -4165,22 +4184,22 @@
         backgroundImage: 'none',
         backgroundColor: '#fadf8f'
       },
-      padding: {top: 1, right: 15/* >(backgroundSize.width + backgroundPosition.right) */, bottom: 1, left: 2},
+      padding: { top: 1, right: 15/* >(backgroundSize.width + backgroundPosition.right) */, bottom: 1, left: 2 },
       minHeight: 15,
-      backgroundPosition: {right: 2, top: 2},
-      backgroundSize: {width: 12, height: 12},
+      backgroundPosition: { right: 2, top: 2 },
+      backgroundSize: { width: 12, height: 12 },
 
       dirKeys: [['top', 'Top'], ['right', 'Right'], ['bottom', 'Bottom'], ['left', 'Left']],
 
       // attachOptions: element, style, hoverStyle, showEffectName, animOptions, onSwitch
-      init: function(attachProps, attachOptions) {
+      init: function (attachProps, attachOptions) {
         traceLog.add('<ATTACHMENTS.mouseHoverAnchor.init>'); // [DEBUG/]
         var conf = ATTACHMENTS.mouseHoverAnchor,
           curStyle, elmStyle, bBox, displaySave, paddingSave = {},
           showEffectName, animOptions, onSwitch;
         attachProps.element = ATTACHMENTS.pointAnchor.checkElement(attachOptions.element);
         // Check HTML element
-        if (!(function(element) {
+        if (!(function (element) {
           var win, doc;
           return !!((doc = element.ownerDocument) && (win = doc.defaultView) && win.HTMLElement &&
             element instanceof win.HTMLElement);
@@ -4192,9 +4211,9 @@
           conf.backgroundSize.width + 'px ' + conf.backgroundSize.height + 'px';
 
         // copy default
-        ['style', 'hoverStyle'].forEach(function(key) {
+        ['style', 'hoverStyle'].forEach(function (key) {
           var defaultStyle = conf[key];
-          attachProps[key] = Object.keys(defaultStyle).reduce(function(copyObj, propName) {
+          attachProps[key] = Object.keys(defaultStyle).reduce(function (copyObj, propName) {
             copyObj[propName] = defaultStyle[propName];
             return copyObj;
           }, {});
@@ -4208,7 +4227,7 @@
           attachProps.style.display = 'block'; // Can't get default `display` when it is `none`.
         }
         // padding (simulate min-padding)
-        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function(key) {
+        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function (key) {
           var confKey = key[0], styleKey = 'padding' + key[1];
           if (parseFloat(curStyle[styleKey]) < conf.padding[confKey]) {
             attachProps.style[styleKey] = conf.padding[confKey] + 'px';
@@ -4220,7 +4239,7 @@
           displaySave = attachProps.element.style.display;
           attachProps.element.style.display = attachProps.style.display;
         }
-        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function(key) {
+        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function (key) {
           var styleKey = 'padding' + key[1];
           if (attachProps.style[styleKey]) {
             paddingSave[styleKey] = attachProps.element.style[styleKey];
@@ -4232,7 +4251,7 @@
         // height (simulate min-height with current style (particularly box-sizing))
         if (bBox.height < conf.minHeight) {
           if (IS_TRIDENT) { // `getComputedStyle().height` returns incorrect value
-            (function() {
+            (function () {
               var height = conf.minHeight;
               if (curStyle.boxSizing === 'content-box') {
                 height -= parseFloat(curStyle.borderTopWidth) + parseFloat(curStyle.borderBottomWidth) +
@@ -4261,7 +4280,7 @@
         if (attachProps.style.display) {
           attachProps.element.style.display = displaySave;
         }
-        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function(key) {
+        ATTACHMENTS.mouseHoverAnchor.dirKeys.forEach(function (key) {
           var styleKey = 'padding' + key[1];
           if (attachProps.style[styleKey]) {
             attachProps.element.style[styleKey] = paddingSave[styleKey];
@@ -4269,10 +4288,10 @@
         });
 
         // merge
-        ['style', 'hoverStyle'].forEach(function(key) {
+        ['style', 'hoverStyle'].forEach(function (key) {
           var propStyle = attachProps[key], optionStyle = attachOptions[key];
           if (isObject(optionStyle)) {
-            Object.keys(optionStyle).forEach(function(propName) {
+            Object.keys(optionStyle).forEach(function (propName) {
               if (typeof optionStyle[propName] === 'string' || isFinite(optionStyle[propName])) {
                 propStyle[propName] = optionStyle[propName];
               } else if (optionStyle[propName] == null) {
@@ -4291,21 +4310,21 @@
         attachProps.elmStyle = elmStyle = attachProps.element.style;
 
         // event handler for this instance
-        attachProps.mouseenter = function(event) {
+        attachProps.mouseenter = function (event) {
           traceLog.add('<ATTACHMENTS.mouseHoverAnchor.mouseenter>'); // [DEBUG/]
           attachProps.hoverStyleSave = conf.getStyles(elmStyle, Object.keys(attachProps.hoverStyle));
           conf.setStyles(elmStyle, attachProps.hoverStyle);
-          attachProps.boundTargets.forEach(function(boundTarget) {
+          attachProps.boundTargets.forEach(function (boundTarget) {
             show(boundTarget.props, true, showEffectName, animOptions);
           });
           if (onSwitch) { onSwitch(event); }
           traceLog.add('</ATTACHMENTS.mouseHoverAnchor.mouseenter>'); // [DEBUG/]
         };
 
-        attachProps.mouseleave = function(event) {
+        attachProps.mouseleave = function (event) {
           traceLog.add('<ATTACHMENTS.mouseHoverAnchor.mouseleave>'); // [DEBUG/]
           conf.setStyles(elmStyle, attachProps.hoverStyleSave);
-          attachProps.boundTargets.forEach(function(boundTarget) {
+          attachProps.boundTargets.forEach(function (boundTarget) {
             show(boundTarget.props, false, showEffectName, animOptions);
           });
           if (onSwitch) { onSwitch(event); }
@@ -4316,12 +4335,12 @@
         return true;
       },
 
-      bind: function(attachProps, bindTarget) {
+      bind: function (attachProps, bindTarget) {
         traceLog.add('<ATTACHMENTS.mouseHoverAnchor.bind>'); // [DEBUG/]
         if (bindTarget.props.svg) {
           ATTACHMENTS.mouseHoverAnchor.llShow(bindTarget.props, false, attachProps.showEffectName);
         } else { // SVG is not setup yet.
-          addDelayedProc(function() {
+          addDelayedProc(function () {
             ATTACHMENTS.mouseHoverAnchor.llShow(bindTarget.props, false, attachProps.showEffectName);
           });
         }
@@ -4337,7 +4356,7 @@
         return true;
       },
 
-      unbind: function(attachProps, boundTarget) {
+      unbind: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.mouseHoverAnchor.unbind>'); // [DEBUG/]
         if (attachProps.enabled && attachProps.boundTargets.length <= 1) { // last one that is unbound
           attachProps.removeEventListener();
@@ -4348,52 +4367,52 @@
         traceLog.add('</ATTACHMENTS.mouseHoverAnchor.unbind>'); // [DEBUG/]
       },
 
-      removeOption: function(attachProps, boundTarget) {
+      removeOption: function (attachProps, boundTarget) {
         ATTACHMENTS.pointAnchor.removeOption(attachProps, boundTarget);
       },
 
-      remove: function(attachProps) {
+      remove: function (attachProps) {
         traceLog.add('<ATTACHMENTS.mouseHoverAnchor.remove>'); // [DEBUG/]
         if (attachProps.boundTargets.length) { // it should be unbound by LeaderLineAttachment.remove
           traceLog.add('error-not-unbound'); // [DEBUG/]
           console.error('LeaderLineAttachment was not unbound by remove');
           attachProps.boundTargets.forEach(
-            function(boundTarget) { ATTACHMENTS.mouseHoverAnchor.unbind(attachProps, boundTarget); });
+            function (boundTarget) { ATTACHMENTS.mouseHoverAnchor.unbind(attachProps, boundTarget); });
         }
         traceLog.add('</ATTACHMENTS.mouseHoverAnchor.remove>'); // [DEBUG/]
       },
 
-      getBBoxNest: function(attachProps, props) {
+      getBBoxNest: function (attachProps, props) {
         return getBBoxNest(attachProps.element, props.baseWindow);
       },
 
       // show/hide immediately
-      llShow: function(props, on, showEffectName) {
+      llShow: function (props, on, showEffectName) {
         SHOW_EFFECTS[showEffectName || props.curStats.show_effect].stop(props, true, on);
         props.aplStats.show_on = on; // It is not updated by svgShow(). (It is used in show().)
       },
 
-      getStyles: function(elmStyle, propNames) {
-        return propNames.reduce(function(copyObj, propName) {
+      getStyles: function (elmStyle, propNames) {
+        return propNames.reduce(function (copyObj, propName) {
           copyObj[propName] = elmStyle[propName];
           return copyObj;
         }, {});
       },
 
-      setStyles: function(elmStyle, styles) {
-        Object.keys(styles).forEach(function(propName) { elmStyle[propName] = styles[propName]; });
+      setStyles: function (elmStyle, styles) {
+        Object.keys(styles).forEach(function (propName) { elmStyle[propName] = styles[propName]; });
       }
     },
 
     captionLabel: {
       type: 'label',
-      argOptions: [{optionName: 'text', type: 'string'}],
-      stats: {color: {}, x: {}, y: {}},
+      argOptions: [{ optionName: 'text', type: 'string' }],
+      stats: { color: {}, x: {}, y: {} },
       textStyleProps: ['fontFamily', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
         'fontSize', 'fontSizeAdjust', 'kerning', 'letterSpacing', 'wordSpacing', 'textDecoration'],
 
       // attachOptions: text, color(A), outlineColor, offset(A), lineOffset, <textStyleProps>
-      init: function(attachProps, attachOptions) {
+      init: function (attachProps, attachOptions) {
         traceLog.add('<ATTACHMENTS.captionLabel.init>'); // [DEBUG/]
         if (typeof attachOptions.text === 'string') {
           attachProps.text = attachOptions.text.trim();
@@ -4408,26 +4427,26 @@
         attachProps.outlineColor = typeof attachOptions.outlineColor === 'string' ?
           attachOptions.outlineColor.trim() : '#fff'; // default
         if (Array.isArray(attachOptions.offset) &&
-            isFinite(attachOptions.offset[0]) && isFinite(attachOptions.offset[1])) {
-          attachProps.offset = {x: attachOptions.offset[0], y: attachOptions.offset[1]};
+          isFinite(attachOptions.offset[0]) && isFinite(attachOptions.offset[1])) {
+          attachProps.offset = { x: attachOptions.offset[0], y: attachOptions.offset[1] };
         }
         if (isFinite(attachOptions.lineOffset)) {
           attachProps.lineOffset = attachOptions.lineOffset;
         }
-        ATTACHMENTS.captionLabel.textStyleProps.forEach(function(propName) {
+        ATTACHMENTS.captionLabel.textStyleProps.forEach(function (propName) {
           if (attachOptions[propName] != null) {
             attachProps[propName] = attachOptions[propName];
           }
         });
 
         // event handler for this instance
-        attachProps.updateColor = function(props) {
+        attachProps.updateColor = function (props) {
           traceLog.add('<ATTACHMENTS.captionLabel.updateColor>'); // [DEBUG/]
           ATTACHMENTS.captionLabel.updateColor(attachProps, props);
           traceLog.add('</ATTACHMENTS.captionLabel.updateColor>'); // [DEBUG/]
         };
 
-        attachProps.updateSocketXY = function(props) {
+        attachProps.updateSocketXY = function (props) {
           traceLog.add('<ATTACHMENTS.captionLabel.updateSocketXY>'); // [DEBUG/]
           var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
             llStats = props.curStats, socketXY = llStats.position_socketXYSE[attachProps.socketIndex],
@@ -4473,7 +4492,7 @@
           traceLog.add('</ATTACHMENTS.captionLabel.updateSocketXY>'); // [DEBUG/]
         };
 
-        attachProps.updatePath = function(props) {
+        attachProps.updatePath = function (props) {
           traceLog.add('<ATTACHMENTS.captionLabel.updatePath>'); // [DEBUG/]
           var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
             pathList = props.pathList.animVal || props.pathList.baseVal,
@@ -4498,19 +4517,19 @@
           traceLog.add('</ATTACHMENTS.captionLabel.updatePath>'); // [DEBUG/]
         };
 
-        attachProps.updateShow = function(props) {
+        attachProps.updateShow = function (props) {
           traceLog.add('<ATTACHMENTS.captionLabel.updateShow>'); // [DEBUG/]
           ATTACHMENTS.captionLabel.updateShow(attachProps, props);
           traceLog.add('</ATTACHMENTS.captionLabel.updateShow>'); // [DEBUG/]
         };
 
         if (IS_WEBKIT) { // [WEBKIT] overflow:visible is ignored
-          attachProps.adjustEdge = function(props, edge) {
+          attachProps.adjustEdge = function (props, edge) {
             traceLog.add('<ATTACHMENTS.captionLabel.adjustEdge>'); // [DEBUG/]
             var curStats = attachProps.curStats;
             if (curStats.x != null) {
               ATTACHMENTS.captionLabel.adjustEdge(edge,
-                {x: curStats.x, y: curStats.y, width: attachProps.width, height: attachProps.height},
+                { x: curStats.x, y: curStats.y, width: attachProps.width, height: attachProps.height },
                 attachProps.strokeWidth / 2);
             }
             traceLog.add('</ATTACHMENTS.captionLabel.adjustEdge>'); // [DEBUG/]
@@ -4521,7 +4540,7 @@
         return true;
       },
 
-      updateColor: function(attachProps, props) {
+      updateColor: function (attachProps, props) {
         var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
           llStats = props.curStats, value;
 
@@ -4531,7 +4550,7 @@
         }
       },
 
-      updateShow: function(attachProps, props) {
+      updateShow: function (attachProps, props) {
         var on = props.isShown === true;
         if (on !== attachProps.isShown) {
           traceLog.add('on=' + on); // [DEBUG/]
@@ -4540,9 +4559,11 @@
         }
       },
 
-      adjustEdge: function(edge, bBox, margin) {
-        var textEdge = {x1: bBox.x - margin, y1: bBox.y - margin,
-          x2: bBox.x + bBox.width + margin, y2: bBox.y + bBox.height + margin};
+      adjustEdge: function (edge, bBox, margin) {
+        var textEdge = {
+          x1: bBox.x - margin, y1: bBox.y - margin,
+          x2: bBox.x + bBox.width + margin, y2: bBox.y + bBox.height + margin
+        };
         if (textEdge.x1 < edge.x1) { edge.x1 = textEdge.x1; }
         if (textEdge.y1 < edge.y1) { edge.y1 = textEdge.y1; }
         if (textEdge.x2 > edge.x2) { edge.x2 = textEdge.x2; }
@@ -4557,12 +4578,12 @@
        * @param {boolean} [stroke] - Setup for `stroke`.
        * @returns {Object} {elmPosition, styleText, styleFill, styleStroke, styleShow, elmsAppend}
        */
-      newText: function(text, document, svg, id, stroke) {
+      newText: function (text, document, svg, id, stroke) {
         var elmText, elmG, elmDefs, elmUseFill, elmUseStroke, style;
 
         elmText = document.createElementNS(SVG_NS, 'text');
         elmText.textContent = text;
-        [elmText.x, elmText.y].forEach(function(list) {
+        [elmText.x, elmText.y].forEach(function (list) {
           var len = svg.createSVGLength();
           len.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX, 0);
           list.baseVal.initialize(len);
@@ -4608,7 +4629,7 @@
         }
       },
 
-      getMidPoint: function(pathList, offset) {
+      getMidPoint: function (pathList, offset) {
         var allPathLen = getAllPathListLen(pathList), pathSegsLen = allPathLen.segsLen, pathLenAll = allPathLen.lenAll,
           pointLen, points, i = -1, newPathList;
 
@@ -4634,22 +4655,22 @@
         }
       },
 
-      initSvg: function(attachProps, props) {
+      initSvg: function (attachProps, props) {
         traceLog.add('<ATTACHMENTS.captionLabel.initSvg>'); // [DEBUG/]
         var text = ATTACHMENTS.captionLabel.newText(attachProps.text, props.baseWindow.document,
-            props.svg, APP_ID + '-captionLabel-' + attachProps._id, attachProps.outlineColor),
+          props.svg, APP_ID + '-captionLabel-' + attachProps._id, attachProps.outlineColor),
           bBox, strokeWidth;
 
         ['elmPosition', 'styleFill', 'styleShow', 'elmsAppend']
-          .forEach(function(key) { attachProps[key] = text[key]; });
+          .forEach(function (key) { attachProps[key] = text[key]; });
 
         attachProps.isShown = false;
         attachProps.styleShow.visibility = 'hidden';
-        ATTACHMENTS.captionLabel.textStyleProps.forEach(function(propName) {
+        ATTACHMENTS.captionLabel.textStyleProps.forEach(function (propName) {
           if (attachProps[propName] != null) { text.styleText[propName] = attachProps[propName]; }
         });
 
-        text.elmsAppend.forEach(function(elm) { props.svg.appendChild(elm); });
+        text.elmsAppend.forEach(function (elm) { props.svg.appendChild(elm); });
         bBox = text.elmPosition.getBBox();
         attachProps.width = bBox.width;
         attachProps.height = bBox.height;
@@ -4673,14 +4694,14 @@
         traceLog.add('</ATTACHMENTS.captionLabel.initSvg>'); // [DEBUG/]
       },
 
-      bind: function(attachProps, bindTarget) {
+      bind: function (attachProps, bindTarget) {
         traceLog.add('<ATTACHMENTS.captionLabel.bind>'); // [DEBUG/]
         traceLog.add('optionName=%s', bindTarget.optionName); // [DEBUG/]
         var props = bindTarget.props;
 
         if (!attachProps.color) { addEventHandler(props, 'cur_line_color', attachProps.updateColor); }
         if ((attachProps.refSocketXY =
-            bindTarget.optionName === 'startLabel' || bindTarget.optionName === 'endLabel')) {
+          bindTarget.optionName === 'startLabel' || bindTarget.optionName === 'endLabel')) {
           attachProps.socketIndex = bindTarget.optionName === 'startLabel' ? 0 : 1;
           addEventHandler(props, 'apl_position', attachProps.updateSocketXY);
           if (!attachProps.offset) {
@@ -4701,12 +4722,12 @@
         return true;
       },
 
-      unbind: function(attachProps, boundTarget) {
+      unbind: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.captionLabel.unbind>'); // [DEBUG/]
         var props = boundTarget.props;
 
         if (attachProps.elmsAppend) {
-          attachProps.elmsAppend.forEach(function(elm) { props.svg.removeChild(elm); });
+          attachProps.elmsAppend.forEach(function (elm) { props.svg.removeChild(elm); });
           attachProps.elmPosition = attachProps.styleFill =
             attachProps.styleShow = attachProps.elmsAppend = null;
         }
@@ -4732,7 +4753,7 @@
         traceLog.add('</ATTACHMENTS.captionLabel.unbind>'); // [DEBUG/]
       },
 
-      removeOption: function(attachProps, boundTarget) {
+      removeOption: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.captionLabel.removeOption>'); // [DEBUG/]
         traceLog.add('optionName=%s', boundTarget.optionName); // [DEBUG/]
         var props = boundTarget.props, newOptions = {};
@@ -4741,13 +4762,13 @@
         traceLog.add('</ATTACHMENTS.captionLabel.removeOption>'); // [DEBUG/]
       },
 
-      remove: function(attachProps) {
+      remove: function (attachProps) {
         traceLog.add('<ATTACHMENTS.captionLabel.remove>'); // [DEBUG/]
         if (attachProps.boundTargets.length) { // it should be unbound by LeaderLineAttachment.remove
           traceLog.add('error-not-unbound'); // [DEBUG/]
           console.error('LeaderLineAttachment was not unbound by remove');
           attachProps.boundTargets.forEach(
-            function(boundTarget) { ATTACHMENTS.captionLabel.unbind(attachProps, boundTarget); });
+            function (boundTarget) { ATTACHMENTS.captionLabel.unbind(attachProps, boundTarget); });
         }
         traceLog.add('</ATTACHMENTS.captionLabel.remove>'); // [DEBUG/]
       }
@@ -4755,11 +4776,11 @@
 
     pathLabel: {
       type: 'label',
-      argOptions: [{optionName: 'text', type: 'string'}],
-      stats: {color: {}, startOffset: {}, pathData: {}},
+      argOptions: [{ optionName: 'text', type: 'string' }],
+      stats: { color: {}, startOffset: {}, pathData: {} },
 
       // attachOptions: text, color(A), outlineColor, lineOffset, <textStyleProps>
-      init: function(attachProps, attachOptions) {
+      init: function (attachProps, attachOptions) {
         traceLog.add('<ATTACHMENTS.pathLabel.init>'); // [DEBUG/]
         if (typeof attachOptions.text === 'string') {
           attachProps.text = attachOptions.text.trim();
@@ -4776,20 +4797,20 @@
         if (isFinite(attachOptions.lineOffset)) {
           attachProps.lineOffset = attachOptions.lineOffset;
         }
-        ATTACHMENTS.captionLabel.textStyleProps.forEach(function(propName) {
+        ATTACHMENTS.captionLabel.textStyleProps.forEach(function (propName) {
           if (attachOptions[propName] != null) {
             attachProps[propName] = attachOptions[propName];
           }
         });
 
         // event handler for this instance
-        attachProps.updateColor = function(props) {
+        attachProps.updateColor = function (props) {
           traceLog.add('<ATTACHMENTS.pathLabel.updateColor>'); // [DEBUG/]
           ATTACHMENTS.captionLabel.updateColor(attachProps, props);
           traceLog.add('</ATTACHMENTS.pathLabel.updateColor>'); // [DEBUG/]
         };
 
-        attachProps.updatePath = function(props) {
+        attachProps.updatePath = function (props) {
           traceLog.add('<ATTACHMENTS.pathLabel.updatePath>'); // [DEBUG/]
           var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
             llStats = props.curStats, pathList = props.pathList.animVal || props.pathList.baseVal,
@@ -4819,7 +4840,7 @@
           traceLog.add('</ATTACHMENTS.pathLabel.updatePath>'); // [DEBUG/]
         };
 
-        attachProps.updateStartOffset = function(props) {
+        attachProps.updateStartOffset = function (props) {
           traceLog.add('<ATTACHMENTS.pathLabel.updateStartOffset>'); // [DEBUG/]
           var curStats = attachProps.curStats, aplStats = attachProps.aplStats,
             llStats = props.curStats, pathLenAll, plugBackLen, startOffset;
@@ -4859,14 +4880,14 @@
           traceLog.add('</ATTACHMENTS.pathLabel.updateStartOffset>'); // [DEBUG/]
         };
 
-        attachProps.updateShow = function(props) {
+        attachProps.updateShow = function (props) {
           traceLog.add('<ATTACHMENTS.pathLabel.updateShow>'); // [DEBUG/]
           ATTACHMENTS.captionLabel.updateShow(attachProps, props);
           traceLog.add('</ATTACHMENTS.pathLabel.updateShow>'); // [DEBUG/]
         };
 
         if (IS_WEBKIT) { // [WEBKIT] overflow:visible is ignored
-          attachProps.adjustEdge = function(props, edge) {
+          attachProps.adjustEdge = function (props, edge) {
             traceLog.add('<ATTACHMENTS.pathLabel.adjustEdge>'); // [DEBUG/]
             if (attachProps.bBox) {
               ATTACHMENTS.captionLabel.adjustEdge(edge, attachProps.bBox, attachProps.strokeWidth / 2);
@@ -4879,14 +4900,14 @@
         return true;
       },
 
-      getOffsetPathData: function(pathList, offsetLen, cornerMargin) {
+      getOffsetPathData: function (pathList, offsetLen, cornerMargin) {
         var STEP_LEN = 16, TOLERANCE = 3, parts = [], lastLineSeg, curPoint;
 
         function nearPoints(a, b) {
           return Math.abs(a.x - b.x) < TOLERANCE && Math.abs(a.y - b.y) < TOLERANCE;
         }
 
-        pathList.forEach(function(points) {
+        pathList.forEach(function (points) {
           var offsetPoints, lineSeg, lastPoints, angle, exPoint, exPointLast, intPoint;
           if (points.length === 2) {
             offsetPoints = getOffsetLine(points[0], points[1], offsetLen);
@@ -4896,7 +4917,7 @@
               angle = Math.atan2(lastPoints[1].y - lastPoints[0].y, lastPoints[0].x - lastPoints[1].x) -
                 Math.atan2(points[0].y - points[1].y, points[1].x - points[0].x);
               if (angle >= 0 && angle <= Math.PI) { // Inside
-                lineSeg = {type: 'line', points: offsetPoints, inside: true};
+                lineSeg = { type: 'line', points: offsetPoints, inside: true };
 
               } else { // Try to join the outer points of corner.
                 exPointLast = extendLine(lastPoints[0], lastPoints[1], offsetLen);
@@ -4904,29 +4925,31 @@
                 if ((intPoint = getIntersection(lastPoints[0], exPointLast, exPoint, offsetPoints[1]))) {
                   // Join the intersecting lines that were extended.
                   lastPoints[1] = intPoint;
-                  lineSeg = {type: 'line', points: [intPoint, offsetPoints[1]]};
+                  lineSeg = { type: 'line', points: [intPoint, offsetPoints[1]] };
                 } else {
                   lastPoints[1] = nearPoints(exPoint, exPointLast) ? exPoint : exPointLast;
-                  lineSeg = {type: 'line', points: [exPoint, offsetPoints[1]]};
+                  lineSeg = { type: 'line', points: [exPoint, offsetPoints[1]] };
                 }
                 lastLineSeg.len = getPointsLength(lastPoints[0], lastPoints[1]);
               }
 
             } else { // new line
-              lineSeg = {type: 'line', points: offsetPoints};
+              lineSeg = { type: 'line', points: offsetPoints };
             }
             lineSeg.len = getPointsLength(lineSeg.points[0], lineSeg.points[1]);
             parts.push((lastLineSeg = lineSeg));
           } else {
-            parts.push({type: 'cubic',
-              points: getOffsetCubic(points[0], points[1], points[2], points[3], offsetLen, STEP_LEN)});
+            parts.push({
+              type: 'cubic',
+              points: getOffsetCubic(points[0], points[1], points[2], points[3], offsetLen, STEP_LEN)
+            });
             lastLineSeg = null;
           }
         });
 
         // Adjust the inner points of corner. (after adjusting outer points)
         lastLineSeg = null;
-        parts.forEach(function(part) {
+        parts.forEach(function (part) {
           var points;
           if (part.type === 'line') {
             if (part.inside) { // lastLineSeg should exist
@@ -4955,17 +4978,17 @@
           }
         });
 
-        return parts.reduce(function(pathData, pathSeg) {
+        return parts.reduce(function (pathData, pathSeg) {
           var points = pathSeg.points;
           if (points) {
             if (!curPoint || !nearPoints(points[0], curPoint)) {
-              pathData.push({type: 'M', values: [points[0].x, points[0].y]});
+              pathData.push({ type: 'M', values: [points[0].x, points[0].y] });
             }
             if (pathSeg.type === 'line') {
-              pathData.push({type: 'L', values: [points[1].x, points[1].y]});
+              pathData.push({ type: 'L', values: [points[1].x, points[1].y] });
             } else { // cubic
               points.shift();
-              points.forEach(function(point) { pathData.push({type: 'L', values: [point.x, point.y]}); });
+              points.forEach(function (point) { pathData.push({ type: 'L', values: [point.x, point.y] }); });
             }
             curPoint = points[points.length - 1];
           }
@@ -4981,7 +5004,7 @@
        * @returns {Object} {elmPosition, elmPath, elmOffset,
        *    styleText, styleFill, styleStroke, styleShow, elmsAppend}
        */
-      newText: function(text, document, id, stroke) {
+      newText: function (text, document, id, stroke) {
         var pathId, textId, elmDefs, elmPath, elmText, elmTextPath, elmG, elmUseFill, elmUseStroke, style;
 
         elmDefs = document.createElementNS(SVG_NS, 'defs');
@@ -5037,24 +5060,24 @@
         }
       },
 
-      initSvg: function(attachProps, props) {
+      initSvg: function (attachProps, props) {
         traceLog.add('<ATTACHMENTS.pathLabel.initSvg>'); // [DEBUG/]
         var text = ATTACHMENTS.pathLabel.newText(attachProps.text, props.baseWindow.document,
-            APP_ID + '-pathLabel-' + attachProps._id, attachProps.outlineColor),
+          APP_ID + '-pathLabel-' + attachProps._id, attachProps.outlineColor),
           bBox, strokeWidth;
 
         ['elmPosition', 'elmPath', 'elmOffset', 'styleFill', 'styleShow', 'elmsAppend']
-          .forEach(function(key) { attachProps[key] = text[key]; });
+          .forEach(function (key) { attachProps[key] = text[key]; });
 
         attachProps.isShown = false;
         attachProps.styleShow.visibility = 'hidden';
-        ATTACHMENTS.captionLabel.textStyleProps.forEach(function(propName) {
+        ATTACHMENTS.captionLabel.textStyleProps.forEach(function (propName) {
           if (attachProps[propName] != null) { text.styleText[propName] = attachProps[propName]; }
         });
 
-        text.elmsAppend.forEach(function(elm) { props.svg.appendChild(elm); });
+        text.elmsAppend.forEach(function (elm) { props.svg.appendChild(elm); });
         // Get size in straight
-        text.elmPath.setPathData([{type: 'M', values: [0, 100]}, {type: 'h', values: [100]}]);
+        text.elmPath.setPathData([{ type: 'M', values: [0, 100] }, { type: 'h', values: [100] }]);
         // [BLINK] getBBox() produces incorrect results for transformed children
         // https://bugs.chromium.org/p/chromium/issues/detail?id=377665
         var hrefSave;
@@ -5088,7 +5111,7 @@
         traceLog.add('</ATTACHMENTS.pathLabel.initSvg>'); // [DEBUG/]
       },
 
-      bind: function(attachProps, bindTarget) {
+      bind: function (attachProps, bindTarget) {
         traceLog.add('<ATTACHMENTS.pathLabel.bind>'); // [DEBUG/]
         traceLog.add('optionName=%s', bindTarget.optionName); // [DEBUG/]
         var props = bindTarget.props;
@@ -5112,12 +5135,12 @@
         return true;
       },
 
-      unbind: function(attachProps, boundTarget) {
+      unbind: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.pathLabel.unbind>'); // [DEBUG/]
         var props = boundTarget.props;
 
         if (attachProps.elmsAppend) {
-          attachProps.elmsAppend.forEach(function(elm) { props.svg.removeChild(elm); });
+          attachProps.elmsAppend.forEach(function (elm) { props.svg.removeChild(elm); });
           attachProps.elmPosition = attachProps.elmPath = attachProps.elmOffset =
             attachProps.styleFill = attachProps.styleShow = attachProps.elmsAppend = null;
         }
@@ -5139,7 +5162,7 @@
         traceLog.add('</ATTACHMENTS.pathLabel.unbind>'); // [DEBUG/]
       },
 
-      removeOption: function(attachProps, boundTarget) {
+      removeOption: function (attachProps, boundTarget) {
         traceLog.add('<ATTACHMENTS.pathLabel.removeOption>'); // [DEBUG/]
         traceLog.add('optionName=%s', boundTarget.optionName); // [DEBUG/]
         var props = boundTarget.props, newOptions = {};
@@ -5148,13 +5171,13 @@
         traceLog.add('</ATTACHMENTS.pathLabel.removeOption>'); // [DEBUG/]
       },
 
-      remove: function(attachProps) {
+      remove: function (attachProps) {
         traceLog.add('<ATTACHMENTS.pathLabel.remove>'); // [DEBUG/]
         if (attachProps.boundTargets.length) { // it should be unbound by LeaderLineAttachment.remove
           traceLog.add('error-not-unbound'); // [DEBUG/]
           console.error('LeaderLineAttachment was not unbound by remove');
           attachProps.boundTargets.forEach(
-            function(boundTarget) { ATTACHMENTS.pathLabel.unbind(attachProps, boundTarget); });
+            function (boundTarget) { ATTACHMENTS.pathLabel.unbind(attachProps, boundTarget); });
         }
         traceLog.add('</ATTACHMENTS.pathLabel.remove>'); // [DEBUG/]
       }
@@ -5162,20 +5185,20 @@
   };
   window.ATTACHMENTS = ATTACHMENTS; // [DEBUG/]
 
-  Object.keys(ATTACHMENTS).forEach(function(attachmentName) {
-    LeaderLine[attachmentName] = function() {
+  Object.keys(ATTACHMENTS).forEach(function (attachmentName) {
+    LeaderLine[attachmentName] = function () {
       return new LeaderLineAttachment(ATTACHMENTS[attachmentName], Array.prototype.slice.call(arguments));
     };
   });
 
   // Update position automatically
   LeaderLine.positionByWindowResize = true;
-  window.addEventListener('resize', AnimEvent.add(function(/* event */) {
+  window.addEventListener('resize', AnimEvent.add(function (/* event */) {
     traceLog.add('<positionByWindowResize>'); // [DEBUG/]
     // var eventWindow;
     if (LeaderLine.positionByWindowResize) {
       // eventWindow = event.target;
-      Object.keys(insProps).forEach(function(id) {
+      Object.keys(insProps).forEach(function (id) {
         // Checking window may be needed when managing each window is supported.
         /*
         var props = insProps[id];
@@ -5185,7 +5208,7 @@
         }
         */
         traceLog.add('id=%s', id); // [DEBUG/]
-        update(insProps[id], {position: true});
+        update(insProps[id], { position: true });
       });
     }
     traceLog.add('</positionByWindowResize>'); // [DEBUG/]
@@ -5199,6 +5222,6 @@
     typeof define === 'function' && define.amd ? define(factory) :
       (global['leader-line'] = factory());
 }(this, (function () {
- return LeaderLine;
+  return LeaderLine;
 })));
 
